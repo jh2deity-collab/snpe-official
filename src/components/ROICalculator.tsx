@@ -142,27 +142,28 @@ export default function ROICalculator() {
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto bg-white rounded-[3rem] p-12 border border-slate-200/60 relative overflow-hidden shadow-2xl shadow-slate-200/50">
+        <div className="w-full max-w-4xl mx-auto bg-slate-900/40 backdrop-blur-2xl rounded-[3rem] p-12 border border-white/5 relative overflow-hidden shadow-2xl">
             {/* Background Glow */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[120px] -mr-32 -mt-32" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[120px] -mr-32 -mt-32" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600/5 rounded-full blur-[120px] -ml-32 -mb-32" />
 
             <div className="relative z-10 grid lg:grid-cols-2 gap-16">
                 {/* Left: Inputs */}
                 <div className="space-y-10">
                     <div className="space-y-4">
                         <div className="flex items-center gap-3 text-primary">
-                            <Calculator size={20} />
-                            <h3 className="text-xl font-black uppercase tracking-widest text-slate-900">ROI Simulator</h3>
+                            <Calculator size={20} className="animate-pulse" />
+                            <h3 className="text-xl font-black uppercase tracking-widest text-white">ROI Simulator</h3>
                         </div>
-                        <p className="text-slate-500 text-sm font-bold">공정 데이터를 입력하여 SNPE 솔루션 도입 효과를 확인하세요.</p>
+                        <p className="text-slate-400 text-sm font-bold border-l-2 border-primary/30 pl-4">공정 데이터를 입력하여 SNPE 솔루션 도입 효과를 확인하세요.</p>
                     </div>
 
                     <div className="space-y-8">
                         {/* Production Volume */}
                         <div className="space-y-4">
                             <div className="flex justify-between items-end">
-                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">연간 생산량 (Units)</label>
-                                <span className="text-lg font-black text-slate-900">{production.toLocaleString()}</span>
+                                <label className="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em]">연간 생산량 (Units)</label>
+                                <span className="text-lg font-black text-white">{production.toLocaleString()}</span>
                             </div>
                             <input
                                 type="range"
@@ -171,15 +172,15 @@ export default function ROICalculator() {
                                 step="10000"
                                 value={production}
                                 onChange={(e) => setProduction(Number(e.target.value))}
-                                className="w-full h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer accent-primary"
+                                className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-primary"
                             />
                         </div>
 
                         {/* Defect Rate */}
                         <div className="space-y-4">
                             <div className="flex justify-between items-end">
-                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">현재 불량률 (%)</label>
-                                <span className="text-lg font-black text-slate-900">{defectRate}%</span>
+                                <label className="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em]">현재 불량률 (%)</label>
+                                <span className="text-lg font-black text-white">{defectRate}%</span>
                             </div>
                             <input
                                 type="range"
@@ -188,15 +189,15 @@ export default function ROICalculator() {
                                 step="0.5"
                                 value={defectRate}
                                 onChange={(e) => setDefectRate(Number(e.target.value))}
-                                className="w-full h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer accent-primary"
+                                className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-primary"
                             />
                         </div>
 
                         {/* Labor Cost */}
                         <div className="space-y-4">
                             <div className="flex justify-between items-end">
-                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">연간 운영 비용 (KRW)</label>
-                                <span className="text-lg font-black text-slate-900">{(laborCost / 10000).toLocaleString()}만원</span>
+                                <label className="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em]">연간 운영 비용 (KRW)</label>
+                                <span className="text-lg font-black text-white">{(laborCost / 10000).toLocaleString()}만원</span>
                             </div>
                             <input
                                 type="range"
@@ -205,26 +206,26 @@ export default function ROICalculator() {
                                 step="10000000"
                                 value={laborCost}
                                 onChange={(e) => setLaborCost(Number(e.target.value))}
-                                className="w-full h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer accent-primary"
+                                className="w-full h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer accent-primary"
                             />
                         </div>
 
                         {/* Contact Form Section */}
-                        <div className="pt-6 border-t border-slate-100 space-y-6">
-                            <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em] mb-4">리포트 수령 정보</h4>
+                        <div className="pt-8 border-t border-white/5 space-y-6">
+                            <h4 className="text-[11px] font-black text-primary uppercase tracking-[0.3em] mb-4">리포트 수령 정보</h4>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-slate-400 uppercase">성함 *</label>
+                                    <label className="text-[11px] font-bold text-slate-300 uppercase tracking-widest ml-1">성함 *</label>
                                     <input
                                         type="text"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
                                         placeholder="홍길동"
-                                        className={`w-full px-4 py-3 bg-slate-50 border ${showValidation && !name ? "border-red-400 ring-4 ring-red-400/5" : "border-slate-200"} rounded-xl text-sm font-bold text-slate-900 focus:border-primary outline-none transition-all`}
+                                        className={`w-full px-4 py-3 bg-slate-950 border ${showValidation && !name ? "border-red-400 ring-4 ring-red-400/5" : "border-slate-800"} rounded-xl text-sm font-bold text-white focus:border-primary focus:bg-slate-900 outline-none transition-all placeholder:text-slate-600 shadow-inner`}
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-slate-400 uppercase">연락처 *</label>
+                                    <label className="text-[11px] font-bold text-slate-300 uppercase tracking-widest ml-1">연락처 *</label>
                                     <input
                                         type="tel"
                                         value={phone}
@@ -239,33 +240,33 @@ export default function ROICalculator() {
                                             setPhone(formatted);
                                         }}
                                         placeholder="010-0000-0000"
-                                        className={`w-full px-4 py-3 bg-slate-50 border ${showValidation && !phone ? "border-red-400 ring-4 ring-red-400/5" : "border-slate-200"} rounded-xl text-sm font-bold text-slate-900 focus:border-primary outline-none transition-all`}
+                                        className={`w-full px-4 py-3 bg-slate-950 border ${showValidation && !phone ? "border-red-400 ring-4 ring-red-400/5" : "border-slate-800"} rounded-xl text-sm font-bold text-white focus:border-primary focus:bg-slate-900 outline-none transition-all placeholder:text-slate-600 shadow-inner`}
                                     />
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-slate-400 uppercase">회사명</label>
+                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-widest ml-1">회사명</label>
                                 <input
                                     type="text"
                                     value={company}
                                     onChange={(e) => setCompany(e.target.value)}
                                     placeholder="(주) SNPE"
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:border-primary outline-none transition-all"
+                                    className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm font-bold text-white focus:border-primary focus:bg-slate-900 outline-none transition-all placeholder:text-slate-600 shadow-inner"
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <div className="pt-4 flex items-center gap-2 text-[10px] text-slate-400 italic">
-                        <Info size={12} />
+                    <div className="pt-4 flex items-center gap-2 text-[11px] text-slate-200 italic">
+                        <Info size={12} className="text-primary" />
                         <span>* 본 수치는 SNPE 솔루션 평균 데이터를 기반으로 한 추정치입니다.</span>
                     </div>
                 </div>
 
                 {/* Right: Results */}
                 <div className="flex flex-col justify-center">
-                    <div className="bg-slate-50/50 rounded-[2.5rem] p-10 border border-slate-200/50 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+                    <div className="bg-slate-950/50 backdrop-blur-3xl rounded-[2.5rem] p-10 border border-white/5 relative overflow-hidden shadow-inner">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
                         <div className="space-y-8">
                             <div className="text-center space-y-2">
@@ -274,28 +275,28 @@ export default function ROICalculator() {
                                     key={savings}
                                     initial={{ scale: 0.9, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
-                                    className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter"
+                                    className="text-4xl md:text-5xl font-black text-white tracking-tighter drop-shadow-[0_0_20px_rgba(59,130,246,0.3)]"
                                 >
-                                    ₩{(savings / 10000).toLocaleString()}<span className="text-xl">만원</span>
+                                    ₩{(savings / 10000).toLocaleString()}<span className="text-xl text-slate-300 ml-1">만원</span>
                                 </motion.h2>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-white border border-slate-200/60 rounded-2xl space-y-2 shadow-sm">
-                                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                                <div className="p-4 bg-slate-900/50 border border-white/5 rounded-2xl space-y-2 shadow-sm group hover:border-primary/30 transition-colors">
+                                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                                         <TrendingUp size={16} />
                                     </div>
                                     <div>
-                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Productivity</p>
+                                        <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Productivity</p>
                                         <p className="text-xl font-black text-primary">+{efficiencyBoost.toFixed(1)}%</p>
                                     </div>
                                 </div>
-                                <div className="p-4 bg-white border border-slate-200/60 rounded-2xl space-y-2 shadow-sm">
-                                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                                <div className="p-4 bg-slate-900/50 border border-white/5 rounded-2xl space-y-2 shadow-sm group hover:border-primary/30 transition-colors">
+                                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                                         <Clock size={16} />
                                     </div>
                                     <div>
-                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Downtime</p>
+                                        <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Downtime</p>
                                         <p className="text-xl font-black text-primary">-68%</p>
                                     </div>
                                 </div>
@@ -304,7 +305,7 @@ export default function ROICalculator() {
                             <button
                                 onClick={handleDownloadReport}
                                 disabled={isGenerating}
-                                className="w-full py-5 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl font-black flex items-center justify-center gap-3 group hover:shadow-xl hover:shadow-slate-900/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                                className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black flex items-center justify-center gap-3 group hover:shadow-[0_0_30px_rgba(37,99,235,0.3)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                             >
                                 {isGenerating ? (
                                     <>
@@ -319,7 +320,7 @@ export default function ROICalculator() {
                                     </>
                                 )}
                             </button>
-                            <p className="text-center text-[10px] text-slate-400 font-medium">
+                            <p className="text-center text-[11px] text-slate-300 font-medium tracking-wide">
                                 * Detailed technical analysis included
                             </p>
                         </div>

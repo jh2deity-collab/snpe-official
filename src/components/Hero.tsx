@@ -64,11 +64,11 @@ export default function Hero() {
 
             {/* Vertical Status Bar (Left Edge) */}
             <div className="absolute left-0 top-0 bottom-0 w-[60px] border-r border-slate-800/50 flex flex-col justify-between items-center py-10 z-20 bg-slate-950/50 backdrop-blur-sm hidden md:flex">
-                <div className="text-xs font-mono text-blue-400 [writing-mode:vertical-rl] tracking-widest uppercase opacity-70">
+                <div className="text-[11px] font-mono text-blue-400 [writing-mode:vertical-rl] tracking-widest uppercase opacity-70">
                     SNPE System Status: Online
                 </div>
                 <div className="h-32 w-[1px] bg-gradient-to-b from-transparent via-blue-500 to-transparent opacity-50" />
-                <div className="text-xs font-mono text-slate-500 [writing-mode:vertical-rl] tracking-widest">
+                <div className="text-[11px] font-mono text-slate-300 [writing-mode:vertical-rl] tracking-widest">
                     {time} UTC+9
                 </div>
             </div>
@@ -92,7 +92,7 @@ export default function Hero() {
                         className="inline-flex items-center gap-3 mb-6"
                     >
                         <span className="w-2 h-2 bg-blue-500 rounded-full animate-ping" />
-                        <span className="text-blue-400 font-mono text-xs md:text-sm tracking-[0.2em] uppercase border border-blue-500/30 px-3 py-1 rounded-full bg-blue-500/10 backdrop-blur-md">
+                        <span className="text-blue-400 font-mono text-[13px] md:text-sm tracking-[0.2em] uppercase border border-blue-500/30 px-3 py-1 rounded-full bg-blue-500/10 backdrop-blur-md">
                             Next-Gen Engineering
                         </span>
                     </motion.div>
@@ -123,7 +123,7 @@ export default function Hero() {
                             x: mousePosition.x * 15
                         }}
                         transition={{ duration: 0.8, delay: 0.4 }}
-                        className="text-slate-400 text-base md:text-xl font-light max-w-xl leading-relaxed mb-10 md:mb-12 border-l-2 border-blue-500/30 pl-4 md:pl-6"
+                        className="text-slate-200 text-base md:text-xl font-light max-w-xl leading-relaxed mb-10 md:mb-12 border-l-2 border-blue-500/30 pl-4 md:pl-6"
                     >
                         데이터가 설계하고 AI가 검증하는 초격차 엔지니어링.<br />
                         <span className="text-white font-medium">SNPE</span>가 귀사의 제조 경쟁력을 완벽하게 재정의합니다.
@@ -174,14 +174,14 @@ export default function Hero() {
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
                                     <Server size={16} className="text-blue-400" />
-                                    <span className="text-xs font-bold text-slate-300">SERVER LOAD</span>
+                                    <span className="text-[11px] font-bold text-slate-100">SERVER LOAD</span>
                                 </div>
-                                <span className="text-xs text-green-400">OPTIMAL</span>
+                                <span className="text-[11px] text-green-400">OPTIMAL</span>
                             </div>
                             <div className="w-full bg-slate-800 h-1.5 rounded-full mb-1">
                                 <div className="w-[34%] bg-blue-500 h-1.5 rounded-full animate-pulse" />
                             </div>
-                            <div className="text-right text-[10px] text-slate-500 font-mono">34% UTILIZED</div>
+                            <div className="text-right text-[11px] text-slate-300 font-mono uppercase tracking-tighter">34% UTILIZED</div>
                         </motion.div>
 
                         {/* Card 2: Security Shield (Main Focus) */}
@@ -197,9 +197,9 @@ export default function Hero() {
                             className="absolute top-[40%] left-[0%] w-72 p-6 bg-slate-800/40 backdrop-blur-2xl border border-cyan-500/30 rounded-xl shadow-[0_0_50px_rgba(34,211,238,0.1)] z-10"
                         >
                             <Shield size={32} className="text-cyan-400 mb-4" />
-                            <div className="text-sm text-cyan-200 font-medium mb-1">SECURITY PROTOCOL</div>
+                            <div className="text-[13px] text-cyan-200 font-medium mb-1">SECURITY PROTOCOL</div>
                             <div className="text-2xl font-black text-white tracking-widest mb-2">LVL. MAX</div>
-                            <p className="text-xs text-slate-400 leading-snug">
+                            <p className="text-[13px] text-slate-200 leading-snug">
                                 실시간 위협 감지 및 자동 방어 시스템 가동 중. 모든 노드 정상 작동.
                             </p>
                         </motion.div>
@@ -217,10 +217,10 @@ export default function Hero() {
                         >
                             <div className="flex items-center gap-3 mb-3">
                                 <Cpu size={20} className="text-indigo-400" />
-                                <span className="text-xs font-bold text-slate-300">AI PROCESSING</span>
+                                <span className="text-[11px] font-bold text-slate-300">AI PROCESSING</span>
                             </div>
                             <div className="flex justify-between items-end">
-                                <span className="text-3xl font-mono text-white">98<span className="text-lg text-slate-500">ms</span></span>
+                                <span className="text-3xl font-mono text-white">98<span className="text-lg text-slate-300">ms</span></span>
                                 <div className="flex gap-1 h-4 items-end">
                                     <span className="w-1 h-2 bg-indigo-500/30" />
                                     <span className="w-1 h-3 bg-indigo-500/50" />
@@ -252,22 +252,22 @@ export default function Hero() {
                 >
                     {/* ... keep existing buttons ... */}
                     <div className="p-6 flex flex-col items-center justify-center hover:bg-white/5 transition-colors cursor-default group">
-                        <span className="text-xs text-slate-500 font-mono mb-1 group-hover:text-blue-400 transition-colors">PROJECTS</span>
+                        <span className="text-[11px] text-slate-200 font-mono mb-1 group-hover:text-blue-400 transition-colors">PROJECTS</span>
                         <span className="text-2xl font-black text-white">128+</span>
                     </div>
                     <div className="p-6 flex flex-col items-center justify-center hover:bg-white/5 transition-colors cursor-default group">
-                        <span className="text-xs text-slate-500 font-mono mb-1 group-hover:text-cyan-400 transition-colors">PARTNERS</span>
+                        <span className="text-[11px] text-slate-200 font-mono mb-1 group-hover:text-cyan-400 transition-colors">PARTNERS</span>
                         <span className="text-2xl font-black text-white">45+</span>
                     </div>
                     <div className="p-6 flex flex-col items-center justify-center hover:bg-white/5 transition-colors cursor-default group">
-                        <span className="text-xs text-slate-500 font-mono mb-1 group-hover:text-indigo-400 transition-colors">EFFICIENCY</span>
+                        <span className="text-[11px] text-slate-200 font-mono mb-1 group-hover:text-indigo-400 transition-colors">EFFICIENCY</span>
                         <span className="text-2xl font-black text-white">400%</span>
                     </div>
                     <div className="p-6 flex flex-col items-center justify-center bg-blue-600/10 hover:bg-blue-600/20 transition-colors cursor-pointer"
                         onClick={() => document.getElementById("services")?.scrollIntoView({ behavior: "smooth" })}
                     >
                         <ChevronDown className="text-blue-400 animate-bounce" />
-                        <span className="text-[10px] text-blue-300 font-bold tracking-widest mt-1">SCROLL</span>
+                        <span className="text-[11px] text-blue-300 font-bold tracking-widest mt-1">SCROLL</span>
                     </div>
                 </motion.div>
             </div>

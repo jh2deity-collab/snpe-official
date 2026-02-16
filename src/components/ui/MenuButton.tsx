@@ -35,19 +35,19 @@ export default function MenuButton({ isOpen, onClick, className = "" }: MenuButt
                 variants={variant.top}
                 animate={isOpen ? "open" : "closed"}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                className="w-5 h-0.5 bg-slate-700 group-hover:bg-blue-400 transition-colors origin-center rounded-full"
+                className="w-5 h-0.5 bg-slate-800 group-hover:bg-blue-600 transition-colors origin-center rounded-full"
             />
             <motion.div
                 variants={variant.center}
                 animate={isOpen ? "open" : "closed"}
                 transition={{ duration: 0.2 }}
-                className="w-5 h-0.5 bg-slate-700 group-hover:bg-blue-400 transition-colors origin-center rounded-full"
+                className="w-5 h-0.5 bg-slate-800 group-hover:bg-blue-600 transition-colors origin-center rounded-full"
             />
             <motion.div
                 variants={variant.bottom}
                 animate={isOpen ? "open" : "closed"}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                className="w-5 h-0.5 bg-slate-700 group-hover:bg-blue-400 transition-colors origin-center rounded-full"
+                className="w-5 h-0.5 bg-slate-800 group-hover:bg-blue-600 transition-colors origin-center rounded-full"
             />
         </motion.button>
     );

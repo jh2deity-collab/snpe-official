@@ -38,8 +38,8 @@ export default function AgentTerminal({ messages }: AgentTerminalProps) {
             {/* Header */}
             <div className="h-8 bg-slate-950 border-b border-slate-800 flex items-center px-3 justify-between">
                 <div className="flex items-center gap-2">
-                    <Terminal size={12} className="text-slate-500" />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Multi-Agent Intelligence Hub</span>
+                    <Terminal size={12} className="text-slate-300" />
+                    <span className="text-[11px] font-bold text-slate-200 uppercase tracking-widest">Multi-Agent Intelligence Hub</span>
                 </div>
                 <div className="flex gap-1.5">
                     <div className="w-2 h-2 rounded-full bg-slate-800" />
@@ -61,14 +61,14 @@ export default function AgentTerminal({ messages }: AgentTerminalProps) {
                                 <div className="p-1 rounded bg-slate-800 border border-slate-700">
                                     {getAgentIcon(msg.agent)}
                                 </div>
-                                <span className={`text-[10px] font-black uppercase ${msg.agent === "Planner" ? "text-yellow-500" :
-                                        msg.agent === "Optimizer" ? "text-blue-500" : "text-green-500"
+                                <span className={`text-[11px] font-black uppercase ${msg.agent === "Planner" ? "text-yellow-500" :
+                                    msg.agent === "Optimizer" ? "text-blue-500" : "text-green-500"
                                     }`}>
                                     {msg.agent}
                                 </span>
                             </div>
-                            <div className={`text-xs pl-7 leading-relaxed ${msg.type === "warn" ? "text-red-400" :
-                                    msg.type === "success" ? "text-cyan-400" : "text-slate-300"
+                            <div className={`text-[13px] pl-7 leading-relaxed ${msg.type === "warn" ? "text-red-400" :
+                                msg.type === "success" ? "text-cyan-400" : "text-slate-300"
                                 }`}>
                                 <span className="text-slate-600 mr-2 opacity-50">&gt;</span>
                                 {msg.text}

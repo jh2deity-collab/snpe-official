@@ -14,7 +14,12 @@ const PROJECTS = [
         solution: "AI 비전 검사 시스템과 실시간 MES(생산관리시스템)를 통합하여 전 공정 자동화 라인을 구축했습니다.",
         outcome: "불량률 0.5% 미만으로 감소, 생산성 35% 향상 및 실시간 공정 트래킹 실현",
         icon: <TrendingUp className="text-blue-500" />,
-        techStack: ["Python", "TensorFlow", "OpenCV", "React"]
+        techStack: ["Python", "TensorFlow", "OpenCV", "React"],
+        stats: [
+            { label: "Defect Rate", value: "0.5%" },
+            { label: "Productivity", value: "+35%" },
+            { label: "ROI", value: "240%" }
+        ]
     },
     {
         year: "2022",
@@ -23,7 +28,12 @@ const PROJECTS = [
         solution: "고성능 국산 PLC 기반 전력 제어 및 모니터링 시스템으로 전면 교체하여 맞춤형 인터페이스를 제공했습니다.",
         outcome: "유지보수 비용 50% 절감, 설비 가동률 99.8% 달성 및 긴급 대응 체계 구축",
         icon: <Settings className="text-secondary" />,
-        techStack: ["PLC", "SCADA", "Modbus", "C++"]
+        techStack: ["PLC", "SCADA", "Modbus", "C++"],
+        stats: [
+            { label: "Maint. Cost", value: "-50%" },
+            { label: "Uptime", value: "99.8%" },
+            { label: "Efficiency", value: "+28%" }
+        ]
     },
     {
         year: "2021",
@@ -32,7 +42,12 @@ const PROJECTS = [
         solution: "클라우드 기반 협업 설계 플랫폼과 통합 데이터 레이크를 구축하여 디지털 트윈 기반 설계 환경을 마련했습니다.",
         outcome: "설계 오류 80% 감소, 신제품 런칭 주기 3개월 단축 및 전사적 데이터 통합 완료",
         icon: <Lightbulb className="text-primary" />,
-        techStack: ["AWS", "Kubernetes", "Docker", "Next.js"]
+        techStack: ["AWS", "Kubernetes", "Docker", "Next.js"],
+        stats: [
+            { label: "Design Error", value: "-80%" },
+            { label: "Time-to-Market", value: "-30%" },
+            { label: "Data Integrity", value: "100%" }
+        ]
     },
 ];
 

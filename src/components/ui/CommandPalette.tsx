@@ -58,18 +58,27 @@ export default function CommandPalette() {
                         exit={{ opacity: 0, scale: 0.95, y: -20 }}
                         className="relative w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden flex flex-col"
                     >
+                        <div className="p-4 flex items-center gap-4">
+                            <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-blue-400">
+                                <Command size={20} />
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="text-[13px] font-black text-white uppercase tracking-widest">Command Center</h4>
+                                <p className="text-[11px] text-slate-300 font-bold uppercase tracking-tighter">System Orchestration</p>
+                            </div>
+                        </div>
                         {/* Input Area */}
                         <div className="flex items-center px-4 py-3 border-b border-white/10">
-                            <Search className="w-5 h-5 text-slate-400 mr-3" />
+                            <Search className="w-5 h-5 text-slate-200 mr-3" />
                             <input
                                 type="text"
                                 placeholder="Type a command or search..."
-                                className="flex-1 bg-transparent text-white placeholder-slate-500 focus:outline-none text-sm font-medium"
+                                className="flex-1 bg-transparent text-white placeholder-slate-300 focus:outline-none text-sm font-medium"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 autoFocus
                             />
-                            <div className="text-[10px] bg-slate-800 text-slate-400 px-2 py-1 rounded border border-white/5 font-mono">ESC</div>
+                            <div className="text-[11px] bg-slate-800 text-slate-200 px-2 py-1 rounded border border-white/5 font-mono">ESC</div>
                         </div>
 
                         {/* Command List */}
@@ -82,14 +91,14 @@ export default function CommandPalette() {
                                         className="w-full flex items-center justify-between px-3 py-2 text-sm text-slate-300 hover:bg-blue-600 hover:text-white rounded-lg group transition-colors text-left"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <span className="text-slate-500 group-hover:text-blue-200 transition-colors">{cmd.icon}</span>
+                                            <span className="text-slate-300 group-hover:text-blue-200 transition-colors">{cmd.icon}</span>
                                             <span>{cmd.label}</span>
                                         </div>
                                         <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </button>
                                 ))
                             ) : (
-                                <div className="px-4 py-8 text-center text-slate-500 text-xs">
+                                <div className="px-4 py-8 text-center text-slate-300 text-[13px]">
                                     No commands found for "{query}"
                                 </div>
                             )}

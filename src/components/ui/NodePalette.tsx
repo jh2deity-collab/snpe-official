@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Cpu, Settings, Zap, CheckCircle2, Box, Truck, Database, Factory, Trash2, Plus } from "lucide-react";
+import { Cpu, Settings, Zap, CheckCircle2, Box, Truck, Database, Factory, Trash2, Plus, Layers } from "lucide-react";
 
 export interface PaletteNode {
     type: string;
@@ -31,6 +31,10 @@ export default function NodePalette({ onAddNode, currentNodes, onRemoveNode }: N
             {/* Palette Section */}
             <div>
                 <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Building Blocks</h3>
+                <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-4">
+                    <Layers size={18} className="text-blue-400" />
+                    <h4 className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Node Library</h4>
+                </div>
                 <div className="grid grid-cols-2 gap-2">
                     {PALETTE_ITEMS.map((item) => (
                         <button
@@ -41,11 +45,11 @@ export default function NodePalette({ onAddNode, currentNodes, onRemoveNode }: N
                             <div className={`${item.color} group-hover:scale-110 transition-transform`}>
                                 {item.icon}
                             </div>
-                            <span className="text-[9px] font-bold text-slate-400 text-center leading-tight uppercase">
+                            <span className="text-[11px] font-bold text-slate-200 text-center leading-tight uppercase">
                                 {item.label}
                             </span>
                             <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Plus size={10} className="text-slate-500" />
+                                <Plus size={10} className="text-slate-300" />
                             </div>
                         </button>
                     ))}
@@ -55,8 +59,8 @@ export default function NodePalette({ onAddNode, currentNodes, onRemoveNode }: N
             {/* Current Chain Section */}
             <div className="flex-1 flex flex-col min-h-0">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Sequence</h3>
-                    <span className="text-[10px] font-mono text-slate-600">{currentNodes.length} / 8</span>
+                    <h3 className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Active Sequence</h3>
+                    <span className="text-[11px] font-mono text-slate-600">{currentNodes.length} / 8</span>
                 </div>
 
                 <div className="flex-1 overflow-y-auto space-y-2 pr-2 scrollbar-thin scrollbar-thumb-slate-800">

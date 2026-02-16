@@ -262,7 +262,7 @@ export default function AIConcierge() {
                                 </div>
                                 <div>
                                     <div className="text-white text-sm font-bold">SNPE AI Assistant</div>
-                                    <div className="text-green-400 text-[10px] flex items-center gap-1">
+                                    <div className="text-green-400 text-[11px] flex items-center gap-1">
                                         <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
                                         Online
                                     </div>
@@ -270,7 +270,7 @@ export default function AIConcierge() {
                             </div>
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="text-slate-400 hover:text-white transition-colors p-1"
+                                className="text-slate-200 hover:text-white transition-colors p-1"
                             >
                                 <X size={18} />
                             </button>

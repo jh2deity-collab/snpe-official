@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { Navigation } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const SECTIONS = [
@@ -23,6 +24,10 @@ export default function Minimap() {
     return (
         <div className="fixed right-6 top-1/2 -translate-y-1/2 z-[50] hidden lg:flex flex-col gap-2 items-center">
             {/* Holographic Track */}
+            <div className="flex items-center gap-3 border-b border-white/5 pb-3 mb-4">
+                <Navigation size={18} className="text-blue-400" />
+                <h4 className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Network Map</h4>
+            </div>
             <div className="absolute top-0 bottom-0 w-[1px] bg-slate-800/50 -z-10" />
 
             {/* Progress Bar */}
@@ -75,7 +80,7 @@ function MinimapNode({ id, label }: { id: string; label: string }) {
             />
 
             {/* Tooltip Label */}
-            <span className={`absolute right-8 font-mono text-[10px] tracking-widest transition-all duration-300 ${isActive ? "text-cyan-400 opacity-100 translate-x-0" : "text-slate-500 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"}`}>
+            <span className={`absolute right-8 font-mono text-[11px] tracking-widest transition-all duration-300 ${isActive ? "text-cyan-400 opacity-100 translate-x-0" : "text-slate-500 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"}`}>
                 {label}
             </span>
         </button>

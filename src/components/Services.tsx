@@ -66,14 +66,14 @@ export default function Services() {
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-[2px] bg-blue-500 shadow-[0_0_15px_#3b82f6]" />
-                                    <span className="text-blue-400 text-xs font-black uppercase tracking-[0.4em] drop-shadow-[0_0_5px_rgba(59,130,246,0.5)]">Core Expertise</span>
+                                    <span className="text-blue-400 text-[13px] font-black uppercase tracking-[0.4em] drop-shadow-[0_0_5px_rgba(59,130,246,0.5)]">Core Expertise</span>
                                 </div>
                                 <h2 className="text-4xl md:text-[3vw] font-black text-white tracking-tighter leading-[0.9]">
                                     QUANTUM <br />
                                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500 filter drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]">LEAP</span> <br />
                                     SOLUTIONS
                                 </h2>
-                                <p className="text-slate-400 font-medium text-lg leading-relaxed max-w-md border-l-2 border-slate-800 pl-6">
+                                <p className="text-slate-200 font-medium text-lg leading-relaxed max-w-md border-l-2 border-slate-800 pl-6">
                                     데이터의 한계를 넘어선 <span className="text-blue-300 font-bold">초격차 기술력</span>. <br />
                                     SNPE는 불가능을 공학적으로 증명합니다.
                                 </p>
@@ -81,15 +81,15 @@ export default function Services() {
 
                             {/* Decorative Tech Elements */}
                             <div className="hidden md:block p-8 rounded-2xl bg-slate-900/50 border border-slate-800/50">
-                                <div className="flex justify-between text-[10px] font-mono text-slate-500 mb-4">
+                                <div className="flex justify-between text-[11px] font-mono text-slate-300 mb-4 uppercase tracking-tighter">
                                     <span>SYSTEM_STATUS</span>
-                                    <span className="text-green-400">OPERATIONAL</span>
+                                    <span className="text-green-400 font-bold">OPERATIONAL</span>
                                 </div>
                                 <div className="space-y-2">
                                     <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
                                         <div className="h-full w-[80%] bg-blue-500 animate-pulse" />
                                     </div>
-                                    <div className="flex justify-between text-[9px] text-slate-600 font-mono">
+                                    <div className="flex justify-between text-[10px] text-slate-400 font-mono">
                                         <span>CPU_LOAD: 80%</span>
                                         <span>NET_TRAFFIC: 12TB/s</span>
                                     </div>
@@ -112,10 +112,10 @@ export default function Services() {
                                     </div>
                                     <div className="space-y-4">
                                         <h3 className="text-2xl font-black text-slate-100 group-hover:text-cyan-400 transition-colors">{service.title}</h3>
-                                        <p className="text-slate-400 text-sm leading-relaxed border-l-2 border-slate-700 pl-4 group-hover:border-blue-500 transition-colors">{service.desc}</p>
+                                        <p className="text-slate-300 text-sm leading-relaxed border-l-2 border-slate-700 pl-4 group-hover:border-blue-500 transition-colors">{service.desc}</p>
                                         <ul className="grid grid-cols-1 gap-2 pt-2">
                                             {service.points.map((point, pIdx) => (
-                                                <li key={pIdx} className="flex items-center gap-2 text-xs font-mono text-slate-500 group-hover:text-blue-300 transition-colors">
+                                                <li key={pIdx} className="flex items-center gap-2 text-[13px] font-mono text-slate-400 group-hover:text-blue-300 transition-colors">
                                                     <div className="w-1 h-1 bg-blue-500 rounded-full" />
                                                     {point}
                                                 </li>
