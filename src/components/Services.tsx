@@ -39,7 +39,7 @@ const services = [
 
 export default function Services() {
     return (
-        <section id="services" className="relative py-32 bg-slate-950 overflow-hidden">
+        <section id="services" className="relative py-16 md:py-32 bg-slate-950 overflow-hidden">
             {/* Deep Space Background Image */}
             <div className="absolute inset-0 z-0">
                 <img
@@ -57,7 +57,7 @@ export default function Services() {
                 <div className="grid md:grid-cols-12 gap-12 lg:gap-24">
                     {/* Left Zone: Sticky Headline (Col 1-5) */}
                     <div className="md:col-span-5 relative">
-                        <div className="sticky top-32 space-y-12">
+                        <div className="relative md:sticky top-0 md:top-32 space-y-8 md:space-y-12 mb-12 md:mb-0">
                             <motion.div
                                 initial={{ opacity: 0, x: -30 }}
                                 whileInView={{ opacity: 1, x: 0 }}

@@ -96,7 +96,7 @@ export default function LeadGen() {
                         viewport={{ once: true }}
                         className="relative"
                     >
-                        <div className="bg-white p-12 md:p-16 rounded-[2.5rem] border border-slate-200/50 shadow-2xl shadow-slate-200/30">
+                        <div className="bg-white p-6 md:p-16 rounded-[2.5rem] border border-slate-200/50 shadow-2xl shadow-slate-200/30">
                             {!isSuccess ? (
                                 <form onSubmit={handleSubmit} className="space-y-8">
                                     <div className="grid md:grid-cols-2 gap-6">

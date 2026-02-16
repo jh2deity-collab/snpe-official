@@ -9,7 +9,7 @@ export default function Navbar() {
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-slate-200/50 transition-all duration-500">
-            <div className="container-custom h-28 flex items-center justify-between">
+            <div className="container-custom h-20 md:h-28 flex items-center justify-between">
                 <motion.div
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
@@ -18,7 +18,7 @@ export default function Navbar() {
                     onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 >
                     {/* Logo Image */}
-                    <div className="relative h-28 w-auto">
+                    <div className="relative h-16 md:h-28 w-auto">
                         <img
                             src="/images/logo.png"
                             alt="SNPE Logo"

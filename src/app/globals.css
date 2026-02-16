@@ -22,7 +22,7 @@ html {
 }
 
 .container-custom {
-  @apply max-w-7xl mx-auto px-6 md:px-12;
+  @apply max-w-7xl mx-auto px-4 md:px-12;
 }
 
 /* Advanced Visual Utilities */

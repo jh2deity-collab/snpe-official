@@ -141,14 +141,14 @@ export default function AIConcierge() {
     };
 
     return (
-        <div className="fixed bottom-8 right-8 z-[100] font-sans">
+        <div className={`fixed z-[100] font-sans ${isOpen ? "inset-0 md:inset-auto md:bottom-8 md:right-8 flex items-center justify-center md:block bg-black/50 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none" : "bottom-8 right-8"}`}>
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.8, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.8, y: 20 }}
-                        className="absolute bottom-20 right-0 w-[350px] sm:w-[380px] bg-slate-900/95 backdrop-blur-xl border border-blue-500/30 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+                        className="relative md:absolute md:bottom-20 md:right-0 w-[90vw] md:w-[460px] h-[80vh] md:h-auto md:max-h-[720px] bg-slate-900/95 backdrop-blur-xl border border-blue-500/30 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
                     >
                         {/* Header */}
                         <div className="bg-gradient-to-r from-blue-900/50 to-slate-900/50 p-4 border-b border-white/5 flex items-center justify-between shrink-0">
@@ -173,7 +173,7 @@ export default function AIConcierge() {
                         </div>
 
                         {/* Chat Body */}
-                        <div className="h-[400px] p-4 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-slate-700 bg-slate-950/50">
+                        <div className="flex-1 min-h-0 p-4 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-slate-700 bg-slate-950/50">
                             {messages.map((msg) => (
                                 <motion.div
                                     key={msg.id}
@@ -264,7 +264,7 @@ export default function AIConcierge() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-14 h-14 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(37,99,235,0.4)] transition-all duration-300 border border-white/10 ${isOpen ? "bg-slate-800 text-white rotate-90" : "bg-blue-600 text-white hover:bg-blue-500"}`}
+                className={`w-14 h-14 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(37,99,235,0.4)] transition-all duration-300 border border-white/10 ${isOpen ? "bg-slate-800 text-white rotate-90 hidden md:flex" : "bg-blue-600 text-white hover:bg-blue-500"}`}
             >
                 {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
             </motion.button>

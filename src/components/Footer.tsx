@@ -28,7 +28,7 @@ export default function Footer() {
     }, []);
 
     return (
-        <footer className="bg-slate-950 border-t border-slate-800/50 pt-20 pb-10 relative overflow-hidden">
+        <footer className="bg-slate-950 border-t border-slate-800/50 pt-10 md:pt-20 pb-10 relative overflow-hidden">
             {/* Background Grid */}
             <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5 bg-[length:30px_30px] pointer-events-none" />
 

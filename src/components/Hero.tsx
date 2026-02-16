@@ -43,7 +43,7 @@ export default function Hero() {
     }, []);
 
     return (
-        <section ref={targetRef} id="hero" className="relative w-full h-screen min-h-[900px] bg-slate-950 overflow-hidden perspective-1000">
+        <section ref={targetRef} id="hero" className="relative w-full h-screen min-h-[100dvh] md:min-h-[900px] bg-slate-950 overflow-hidden perspective-1000">
             {/* Background Layer (Slow Movement) */}
             <motion.div
                 className="absolute inset-0 z-0"
@@ -74,7 +74,7 @@ export default function Hero() {
             </div>
 
             {/* Main Content Grid (12 Columns) */}
-            <div className="container-custom h-full grid grid-cols-1 md:grid-cols-12 gap-6 relative z-10 pt-32 pb-10 pl-[80px]">
+            <div className="container-custom h-full grid grid-cols-1 md:grid-cols-12 gap-6 relative z-10 pt-24 md:pt-32 pb-10 pl-0 md:pl-[80px]">
 
                 {/* Left Zone: Typography (Columns 1-7) */}
                 <motion.div
@@ -92,7 +92,7 @@ export default function Hero() {
                         className="inline-flex items-center gap-3 mb-6"
                     >
                         <span className="w-2 h-2 bg-blue-500 rounded-full animate-ping" />
-                        <span className="text-blue-400 font-mono text-sm tracking-[0.2em] uppercase border border-blue-500/30 px-3 py-1 rounded-full bg-blue-500/10 backdrop-blur-md">
+                        <span className="text-blue-400 font-mono text-xs md:text-sm tracking-[0.2em] uppercase border border-blue-500/30 px-3 py-1 rounded-full bg-blue-500/10 backdrop-blur-md">
                             Next-Gen Engineering
                         </span>
                     </motion.div>
@@ -106,7 +106,7 @@ export default function Hero() {
                             y: mousePosition.y * 20
                         }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="text-4xl md:text-[3vw] font-black leading-[0.9] text-white tracking-tight mb-8"
+                        className="text-[42px] md:text-[3vw] font-black leading-[0.9] text-white tracking-tight mb-6 md:mb-8"
                     >
                         DEFINE <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500">
@@ -123,7 +123,7 @@ export default function Hero() {
                             x: mousePosition.x * 15
                         }}
                         transition={{ duration: 0.8, delay: 0.4 }}
-                        className="text-slate-400 text-lg md:text-xl font-light max-w-xl leading-relaxed mb-12 border-l-2 border-blue-500/30 pl-6"
+                        className="text-slate-400 text-base md:text-xl font-light max-w-xl leading-relaxed mb-10 md:mb-12 border-l-2 border-blue-500/30 pl-4 md:pl-6"
                     >
                         데이터가 설계하고 AI가 검증하는 초격차 엔지니어링.<br />
                         <span className="text-white font-medium">SNPE</span>가 귀사의 제조 경쟁력을 완벽하게 재정의합니다.
