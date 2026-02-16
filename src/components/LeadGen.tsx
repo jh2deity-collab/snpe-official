@@ -32,7 +32,8 @@ export default function LeadGen() {
                 setIsSuccess(true);
                 (e.target as HTMLFormElement).reset();
             } else {
-                alert("전송에 실패했습니다. 유선으로 문의해 주세요.");
+                const errorData = await response.json();
+                alert(errorData.message || "전송에 실패했습니다. 유선으로 문의해 주세요.");
             }
         } catch (error) {
             console.error(error);

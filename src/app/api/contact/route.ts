@@ -30,7 +30,9 @@ export async function POST(req: Request) {
         }
 
         const transporter = nodemailer.createTransport({
-            service: "gmail",
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true, // true for 465, false for other ports
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS,
@@ -61,8 +63,17 @@ export async function POST(req: Request) {
             { message: "상담 신청이 성공적으로 접수되었습니다." },
             { status: 200 }
         );
-    } catch (error) {
+    } catch (error: any) {
         console.error("Email API Error:", error);
+
+        // 구체적인 에러 메시지 반환 (보안상 운영 환경에서는 가리는 것이 좋으나 디버깅을 위해 추가)
+        if (error.responseCode === 535) {
+            return NextResponse.json(
+                { message: "이메일 인증에 실패했습니다. (앱 비밀번호를 다시 확인해 주세요)" },
+                { status: 401 }
+            );
+        }
+
         return NextResponse.json(
             { message: "서버 오류로 인해 전송에 실패했습니다." },
             { status: 500 }

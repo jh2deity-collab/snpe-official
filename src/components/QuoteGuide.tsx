@@ -84,7 +84,8 @@ export default function QuoteGuide() {
             if (response.ok) {
                 setStep("success");
             } else {
-                alert("전송 중 오류가 발생했습니다.");
+                const errorData = await response.json();
+                alert(errorData.message || "전송 중 오류가 발생했습니다.");
             }
         } catch (error) {
             console.error(error);

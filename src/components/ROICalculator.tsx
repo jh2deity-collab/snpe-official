@@ -135,7 +135,7 @@ export default function ROICalculator() {
         doc.setFontSize(9);
         doc.setTextColor(100);
         doc.text("SNPE Official | Intelligent Process Automation", 20, footerY + 10);
-        doc.text("Contact: optimization@snpe.com", pageWidth - 20, footerY + 10, { align: "right" });
+        doc.text("Contact: ok@snpe.kr", pageWidth - 20, footerY + 10, { align: "right" });
 
         // Send notification to ok@snpe.kr
         try {
