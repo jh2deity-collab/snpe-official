@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Calculator, TrendingUp, Clock, ArrowRight, Info, Download, Loader2, FileText } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Calculator, TrendingUp, Clock, ArrowRight, Info, Download, Loader2, FileText, AlertCircle, X } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -14,6 +14,21 @@ export default function ROICalculator() {
     const [savings, setSavings] = useState(0);
     const [efficiencyBoost, setEfficiencyBoost] = useState(0);
     const [isGenerating, setIsGenerating] = useState(false);
+
+    // Contact State
+    const [company, setCompany] = useState("");
+    const [name, setName] = useState("");
+    const [phone, setPhone] = useState("");
+    const [showValidation, setShowValidation] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+
+    // Auto-hide alert
+    useEffect(() => {
+        if (showAlert) {
+            const timer = setTimeout(() => setShowAlert(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [showAlert]);
 
     useEffect(() => {
         // Simple logic for simulation
@@ -27,7 +42,15 @@ export default function ROICalculator() {
     }, [production, defectRate, laborCost]);
 
     const handleDownloadReport = async () => {
+        // Validation check
+        if (!name || !phone) {
+            setShowValidation(true);
+            setShowAlert(true);
+            return;
+        }
+
         setIsGenerating(true);
+        setShowValidation(false);
 
         // Simulate processing delay for effect
         await new Promise(resolve => setTimeout(resolve, 1500));
@@ -47,8 +70,9 @@ export default function ROICalculator() {
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(148, 163, 184); // Slate 400
-        doc.text(`Reference ID: REF-${Math.floor(Math.random() * 100000)}`, 20, 30);
-        doc.text(`Date: ${new Date().toLocaleDateString()}`, pageWidth - 20, 30, { align: "right" });
+        doc.text(`Reference ID: REF-${Math.floor(Math.random() * 100000)}`, 20, 27);
+        doc.text(`Client: ${name} (${company || "N/A"})`, 20, 33);
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, pageWidth - 20, 33, { align: "right" });
 
         // 2. Executive Summary
         doc.setTextColor(51, 65, 85); // Slate 700
@@ -70,9 +94,11 @@ export default function ROICalculator() {
             startY: 100,
             head: [['Parameter', 'Value', 'Unit']],
             body: [
+                ['Client Name', name, 'Individual'],
+                ['Company', company || 'N/A', 'Organization'],
                 ['Annual Production', production.toLocaleString(), 'Units'],
                 ['Current Defect Rate', `${defectRate}%`, 'Percentage'],
-                ['Operational Cost', `${(laborCost / 10000).toLocaleString()}0,000`, 'KRW/Year'],
+                ['Operational Cost', `${(laborCost / 10000).toLocaleString()}만원`, 'KRW/Year'],
             ],
             headStyles: { fillColor: [15, 23, 42], textColor: 255, fontStyle: 'bold' },
             bodyStyles: { textColor: 50 },
@@ -182,6 +208,52 @@ export default function ROICalculator() {
                                 className="w-full h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer accent-primary"
                             />
                         </div>
+
+                        {/* Contact Form Section */}
+                        <div className="pt-6 border-t border-slate-100 space-y-6">
+                            <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em] mb-4">리포트 수령 정보</h4>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase">성함 *</label>
+                                    <input
+                                        type="text"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        placeholder="홍길동"
+                                        className={`w-full px-4 py-3 bg-slate-50 border ${showValidation && !name ? "border-red-400 ring-4 ring-red-400/5" : "border-slate-200"} rounded-xl text-sm font-bold text-slate-900 focus:border-primary outline-none transition-all`}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase">연락처 *</label>
+                                    <input
+                                        type="tel"
+                                        value={phone}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/[^0-9]/g, '');
+                                            let formatted = val;
+                                            if (val.length > 3 && val.length <= 7) {
+                                                formatted = `${val.slice(0, 3)}-${val.slice(3)}`;
+                                            } else if (val.length > 7) {
+                                                formatted = `${val.slice(0, 3)}-${val.slice(3, 7)}-${val.slice(7, 11)}`;
+                                            }
+                                            setPhone(formatted);
+                                        }}
+                                        placeholder="010-0000-0000"
+                                        className={`w-full px-4 py-3 bg-slate-50 border ${showValidation && !phone ? "border-red-400 ring-4 ring-red-400/5" : "border-slate-200"} rounded-xl text-sm font-bold text-slate-900 focus:border-primary outline-none transition-all`}
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase">회사명</label>
+                                <input
+                                    type="text"
+                                    value={company}
+                                    onChange={(e) => setCompany(e.target.value)}
+                                    placeholder="(주) SNPE"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:border-primary outline-none transition-all"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <div className="pt-4 flex items-center gap-2 text-[10px] text-slate-400 italic">
@@ -254,6 +326,37 @@ export default function ROICalculator() {
                     </div>
                 </div>
             </div>
+
+            {/* Premium Validation Alert */}
+            <AnimatePresence>
+                {showAlert && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] w-[90%] max-w-sm"
+                    >
+                        <div className="bg-slate-900/95 backdrop-blur-2xl border border-red-500/30 p-5 rounded-2xl shadow-[0_20px_50px_rgba(239,68,68,0.2)] flex items-center gap-4 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-red-500 to-transparent" />
+                            <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center text-red-400 shrink-0 border border-red-500/20">
+                                <AlertCircle size={24} className="animate-pulse" />
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="text-white font-black text-sm uppercase tracking-tight">INPUT REQUIRED</h4>
+                                <p className="text-slate-400 text-xs font-bold leading-relaxed">
+                                    리포트 생성을 위해 <span className="text-red-400">성함과 연락처</span>를 정확히 입력해 주세요.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowAlert(false)}
+                                className="text-slate-500 hover:text-white transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

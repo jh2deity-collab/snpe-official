@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Factory,
@@ -14,7 +14,9 @@ import {
     Zap,
     ShieldCheck,
     Send,
-    Loader2
+    Loader2,
+    AlertCircle,
+    X
 } from "lucide-react";
 
 type Step = "industry" | "solution" | "scale" | "contact" | "success";
@@ -31,6 +33,16 @@ export default function QuoteGuide() {
         content: ""
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showValidation, setShowValidation] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+
+    // Auto-hide alert
+    useEffect(() => {
+        if (showAlert) {
+            const timer = setTimeout(() => setShowAlert(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [showAlert]);
 
     const INDUSTRIES = [
         { id: "semi", name: "반도체/디스플레이", icon: <Cpu /> },
@@ -50,9 +62,13 @@ export default function QuoteGuide() {
     const submitForm = async () => {
         // Validation: Check for required fields
         if (!formData.name.trim() || !formData.phone.trim()) {
-            alert("필수 항목(성함, 연락처)을 모두 입력해 주세요.");
+            setShowValidation(true);
+            setShowAlert(true);
             return;
         }
+
+        setShowValidation(false);
+        setShowAlert(false);
 
         setIsSubmitting(true);
         try {
@@ -119,9 +135,9 @@ export default function QuoteGuide() {
                                     exit={{ opacity: 0, x: -20 }}
                                     className="space-y-16"
                                 >
-                                    <div className="text-center space-y-3">
-                                        <p className="text-[11px] font-black text-primary uppercase tracking-[0.3em]">Phase 01</p>
-                                        <h3 className="text-4xl font-black text-slate-900 tracking-tight">산업군을 선택해 주세요</h3>
+                                    <div className="text-center space-y-2">
+                                        <p className="text-sm font-black text-primary uppercase tracking-[0.3em]">Phase 01</p>
+                                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">산업군을 선택해 주세요</h3>
                                     </div>
                                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                                         {INDUSTRIES.map((item) => (
@@ -136,7 +152,7 @@ export default function QuoteGuide() {
                                                 <div className="w-20 h-20 bg-slate-50 group-hover:bg-primary text-slate-400 group-hover:text-white rounded-3xl flex items-center justify-center transition-all duration-500 shadow-sm border border-slate-200/50 group-hover:border-primary">
                                                     {item.icon}
                                                 </div>
-                                                <span className="font-black text-[15px] text-slate-900 group-hover:text-primary transition-colors tracking-tighter uppercase">{item.name}</span>
+                                                <span className="font-black text-xs text-slate-900 group-hover:text-primary transition-colors tracking-tight uppercase">{item.name}</span>
                                             </button>
                                         ))}
                                     </div>
@@ -151,9 +167,9 @@ export default function QuoteGuide() {
                                     exit={{ opacity: 0, x: -20 }}
                                     className="space-y-16"
                                 >
-                                    <div className="text-center space-y-3">
-                                        <p className="text-[11px] font-black text-primary uppercase tracking-[0.3em]">Phase 02</p>
-                                        <h3 className="text-4xl font-black text-slate-900 tracking-tight">필요한 솔루션은 무엇인가요?</h3>
+                                    <div className="text-center space-y-2">
+                                        <p className="text-sm font-black text-primary uppercase tracking-[0.3em]">Phase 02</p>
+                                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">필요한 솔루션은 무엇인가요?</h3>
                                     </div>
                                     <div className="grid md:grid-cols-2 gap-6">
                                         {SOLUTIONS.map((item) => (
@@ -169,8 +185,8 @@ export default function QuoteGuide() {
                                                     {item.id.toUpperCase()}
                                                 </div>
                                                 <div className="space-y-1">
-                                                    <p className="font-black text-slate-900 text-2xl tracking-tight underline decoration-primary/30 decoration-2 underline-offset-4 decoration-transparent group-hover:decoration-primary transition-all">{item.name}</p>
-                                                    <p className="text-slate-600 text-sm font-bold mt-2 leading-relaxed">{item.desc}</p>
+                                                    <p className="font-black text-slate-900 text-xl tracking-tight underline decoration-primary/30 decoration-2 underline-offset-4 decoration-transparent group-hover:decoration-primary transition-all">{item.name}</p>
+                                                    <p className="text-slate-600 text-xs font-bold mt-2 leading-relaxed">{item.desc}</p>
                                                 </div>
                                             </button>
                                         ))}
@@ -190,9 +206,9 @@ export default function QuoteGuide() {
                                     exit={{ opacity: 0, x: -20 }}
                                     className="space-y-16"
                                 >
-                                    <div className="text-center space-y-3">
-                                        <p className="text-[11px] font-black text-primary uppercase tracking-[0.3em]">Phase 03</p>
-                                        <h3 className="text-4xl font-black text-slate-900 tracking-tight">프로젝트 규모를 선택해 주세요</h3>
+                                    <div className="text-center space-y-2">
+                                        <p className="text-sm font-black text-primary uppercase tracking-[0.3em]">Phase 03</p>
+                                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">프로젝트 규모를 선택해 주세요</h3>
                                     </div>
                                     <div className="grid md:grid-cols-3 gap-8">
                                         {[
@@ -211,7 +227,7 @@ export default function QuoteGuide() {
                                                 <div className="text-slate-400 group-hover:text-primary transition-all duration-500 group-hover:scale-125">
                                                     {item.icon}
                                                 </div>
-                                                <span className="font-black text-slate-900 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">{item.label}</span>
+                                                <span className="font-black text-slate-900 group-hover:text-primary transition-colors uppercase tracking-widest text-xs">{item.label}</span>
                                             </button>
                                         ))}
                                     </div>
@@ -230,8 +246,8 @@ export default function QuoteGuide() {
                                     exit={{ opacity: 0, x: -20 }}
                                     className="space-y-16"
                                 >
-                                    <div className="text-center space-y-8">
-                                        <h3 className="text-4xl font-black text-slate-900 tracking-tight">최종 리포트 신청</h3>
+                                    <div className="text-center space-y-6">
+                                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">최종 리포트 신청</h3>
                                         <div className="inline-block p-10 bg-slate-50 border-2 border-slate-100 rounded-[2rem] text-left max-w-xl shadow-sm">
                                             <ul className="space-y-5">
                                                 <li className="flex items-center gap-4 text-slate-800 font-black text-sm">
@@ -261,14 +277,14 @@ export default function QuoteGuide() {
                                         <input
                                             type="text"
                                             placeholder="성함 *"
-                                            className="w-full px-8 py-5 bg-slate-50 border-2 border-slate-200 rounded-2xl focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none font-bold text-slate-900 transition-all shadow-sm placeholder:text-slate-400"
+                                            className={`w-full px-8 py-5 bg-slate-50 border-2 ${showValidation && !formData.name ? "border-red-400 ring-4 ring-red-400/5" : "border-slate-200"} rounded-2xl focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none font-bold text-slate-900 transition-all shadow-sm placeholder:text-slate-400`}
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         />
                                         <input
                                             type="tel"
                                             placeholder="연락처 * (가이드 수령용)"
-                                            className="w-full px-8 py-5 bg-slate-50 border-2 border-slate-200 rounded-2xl focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none font-bold text-slate-900 transition-all col-span-2 shadow-sm placeholder:text-slate-400"
+                                            className={`w-full px-8 py-5 bg-slate-50 border-2 ${showValidation && !formData.phone ? "border-red-400 ring-4 ring-red-400/5" : "border-slate-200"} rounded-2xl focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/5 outline-none font-bold text-slate-900 transition-all col-span-2 shadow-sm placeholder:text-slate-400`}
                                             value={formData.phone}
                                             onChange={(e) => {
                                                 const val = e.target.value.replace(/[^0-9]/g, '');
@@ -309,9 +325,9 @@ export default function QuoteGuide() {
                                     <div className="w-32 h-32 bg-primary rounded-[2rem] flex items-center justify-center text-white mx-auto shadow-2xl shadow-primary/30">
                                         <FileText size={48} />
                                     </div>
-                                    <div className="space-y-6">
-                                        <h3 className="text-5xl font-black text-slate-900 tracking-tight">신청 완료</h3>
-                                        <p className="text-slate-500 font-bold text-xl leading-relaxed max-w-lg mx-auto">
+                                    <div className="space-y-4">
+                                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">신청 완료</h3>
+                                        <p className="text-slate-500 font-bold text-sm leading-relaxed max-w-lg mx-auto">
                                             분석된 정보를 바탕으로 SNPE 기술팀이 <br />
                                             <span className="text-primary">맞춤형 기술 가이드 팩</span>을 준비 중입니다.
                                         </p>
@@ -332,6 +348,37 @@ export default function QuoteGuide() {
                     </div>
                 </div>
             </div>
+
+            {/* Premium Validation Alert */}
+            <AnimatePresence>
+                {showAlert && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] w-[90%] max-w-sm"
+                    >
+                        <div className="bg-slate-900/95 backdrop-blur-2xl border border-red-500/30 p-5 rounded-2xl shadow-[0_20px_50px_rgba(239,68,68,0.2)] flex items-center gap-4 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-red-500 to-transparent" />
+                            <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center text-red-400 shrink-0 border border-red-500/20">
+                                <AlertCircle size={24} className="animate-pulse" />
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="text-white font-black text-sm uppercase tracking-tight">INPUT REQUIRED</h4>
+                                <p className="text-slate-400 text-xs font-bold leading-relaxed">
+                                    리포트 신청을 위해 <span className="text-red-400">성함과 연락처</span>를 모두 입력해 주세요.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowAlert(false)}
+                                className="text-slate-500 hover:text-white transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </section>
     );
 }

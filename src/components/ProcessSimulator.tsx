@@ -2,7 +2,11 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cpu, Settings, Zap, CheckCircle2, Activity, Terminal as TerminalIcon, ArrowRight, Loader2, Mic, MicOff, Waves } from "lucide-react";
+import { Cpu, Settings, Zap, CheckCircle2, Activity, Terminal as TerminalIcon, ArrowRight, Loader2, Mic, MicOff, Waves, Box as BoxIcon, Layers, Bot, LayoutDashboard, Plus } from "lucide-react";
+import FactoryScene from "@/components/ui/FactoryScene";
+import AgentTerminal, { AgentMessage } from "@/components/ui/AgentTerminal";
+import IoTDashboard from "@/components/ui/IoTDashboard";
+import NodePalette, { PaletteNode } from "@/components/ui/NodePalette";
 
 // Speech Recognition Type
 declare global {
@@ -25,10 +29,21 @@ export default function ProcessSimulator() {
     const [isOptimized, setIsOptimized] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showInput, setShowInput] = useState(true);
+    const [viewMode, setViewMode] = useState<"2D" | "3D">("3D"); // Default to 3D for impact
 
     // Voice State
     const [isListening, setIsListening] = useState(false);
     const [voiceTranscript, setVoiceTranscript] = useState("");
+
+    // Agent State
+    const [agentMessages, setAgentMessages] = useState<AgentMessage[]>([]);
+
+    // IoT State
+    const [iotData, setIotData] = useState<any[]>([]);
+    const [healingStatus, setHealingStatus] = useState<"stable" | "anomaly" | "healing">("stable");
+    const [activeTab, setActiveTab] = useState<"process" | "iot">("process");
+    const [isBuildMode, setIsBuildMode] = useState(false);
+    const [customNodes, setCustomNodes] = useState<any[]>([]);
 
     // User Inputs
     const [industry, setIndustry] = useState("");
@@ -69,6 +84,68 @@ export default function ProcessSimulator() {
             }
         ]);
     };
+
+    // Helper to add agent message
+    const pushAgentMsg = (agent: "Planner" | "Optimizer" | "Guard", text: string, type: "info" | "warn" | "success" = "info") => {
+        setAgentMessages(prev => [...prev, {
+            id: Math.random().toString(),
+            agent,
+            text,
+            type
+        }]);
+    };
+
+    // IoT Simulation Effect
+    useEffect(() => {
+        let anomalyTimer: any;
+        const interval = setInterval(() => {
+            setIotData(prev => {
+                const last = prev[prev.length - 1] || { vibration: 45, temp: 65, power: 120 };
+                let deltaVib = (Math.random() - 0.5) * 5;
+                let deltaTemp = (Math.random() - 0.5) * 2;
+                let deltaPower = (Math.random() - 0.5) * 10;
+
+                // Anomaly Logic
+                if (healingStatus === "anomaly") {
+                    deltaVib = 5 + Math.random() * 10;
+                    deltaTemp = 2 + Math.random() * 5;
+                } else if (healingStatus === "healing") {
+                    deltaVib = -10;
+                    deltaTemp = -5;
+                }
+
+                const newData = {
+                    time: new Date().toLocaleTimeString(),
+                    vibration: Math.max(10, Math.min(150, last.vibration + deltaVib)),
+                    temp: Math.max(20, Math.min(120, last.temp + deltaTemp)),
+                    power: Math.max(50, Math.min(300, last.power + deltaPower))
+                };
+
+                const next = [...prev, newData].slice(-20);
+
+                // Trigger Anomaly
+                if (healingStatus === "stable" && isOptimized && newData.vibration > 100 && !anomalyTimer) {
+                    setHealingStatus("anomaly");
+                    pushAgentMsg("Guard", "CRITICAL ANOMALY: Excessive vibration detected in Node 2!", "warn");
+
+                    anomalyTimer = setTimeout(() => {
+                        setHealingStatus("healing");
+                        pushAgentMsg("Optimizer", "Initiating AI self-healing protocols. Calibrating dampeners.", "info");
+
+                        setTimeout(() => {
+                            setHealingStatus("stable");
+                            pushAgentMsg("Guard", "System stabilized. Vibration levels returning to nominal.", "success");
+                            anomalyTimer = null;
+                        }, 5000);
+                    }, 4000);
+                }
+
+                return next;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [healingStatus, isOptimized]);
 
     // Auto-scroll logs
     useEffect(() => {
@@ -208,15 +285,28 @@ export default function ProcessSimulator() {
         }
 
         try {
+            setAgentMessages([]); // Clear previous messages
+
+            // Agent 1: Planner kicks off
+            pushAgentMsg("Planner", `Analyzing ${isBuildMode ? "custom workflow sequence" : industry} for latent bottlenecks...`, "info");
+
             const res = await fetch('/api/simulate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ industry, problem, voiceInput }),
+                body: JSON.stringify({
+                    industry,
+                    problem,
+                    voiceInput,
+                    customNodes: isBuildMode ? customNodes.map(n => n.label) : null
+                }),
             });
 
             if (!res.ok) throw new Error('Simulation Failed');
 
             const data = await res.json();
+
+            // Agent 2: Optimizer analyzes data
+            setTimeout(() => pushAgentMsg("Optimizer", "Neural kernel processing. Optimization vector identified.", "info"), 1500);
 
             // If voice input, update the input fields with extracted info
             if (data.extracted_info) {
@@ -226,15 +316,23 @@ export default function ProcessSimulator() {
             }
 
             // Transform API nodes to fit UI structure
-            // We map the first 4 nodes from API to our fixed positions
-            const newNodes = data.nodes.slice(0, 4).map((n: any, idx: number) => ({
-                id: idx + 1,
-                label: n.label,
-                icon: idx === 0 ? <Cpu size={18} /> : idx === 1 ? <Settings size={18} /> : idx === 2 ? <Zap size={18} /> : <CheckCircle2 size={18} />
-            }));
+            // If we have custom nodes, we DON'T overwrite them, just optimize them
+            let newNodes;
+            if (isBuildMode && customNodes.length > 0) {
+                newNodes = [...customNodes];
+            } else {
+                newNodes = data.nodes.slice(0, 4).map((n: any, idx: number) => ({
+                    id: idx + 1,
+                    label: n.label,
+                    icon: idx === 0 ? <Cpu size={18} /> : idx === 1 ? <Settings size={18} /> : idx === 2 ? <Zap size={18} /> : <CheckCircle2 size={18} />
+                }));
+            }
 
             // Animation Sequence
             setTimeout(() => {
+                // Agent 3: Guard validates
+                pushAgentMsg("Guard", "Validating throughput integrity... Security protocols nominal.", "success");
+
                 setNodes(newNodes);
                 // Instead of setting metrics instantly, we set the TARGET
                 setTargetMetrics(data.metrics);
@@ -245,7 +343,10 @@ export default function ProcessSimulator() {
                 addLog("OPTIMIZATION COMPLETE");
                 addLog("AI KERNEL ACTIVE");
                 addLog("REAL-TIME MONITORING STARTED");
-            }, 1000);
+
+                // Final Success from Planner
+                setTimeout(() => pushAgentMsg("Planner", "Simulation deployment finalized. Efficiency gain verified.", "success"), 1000);
+            }, 3000); // Wait bit more for dramatic effect with agents
 
         } catch (error) {
             console.error(error);
@@ -264,7 +365,45 @@ export default function ProcessSimulator() {
         setAiAnalysis("");
         setDisplayedAnalysis("");
         setShowInput(true);
+        setAgentMessages([]);
         addLog("SYSTEM RESET");
+    };
+
+    const handleAddNode = (item: PaletteNode) => {
+        if (customNodes.length >= 8) {
+            pushAgentMsg("Guard", "Maximum sequence length reached (8 nodes).", "warn");
+            return;
+        }
+        const newNode = {
+            id: Date.now(),
+            label: item.label,
+            icon: item.icon,
+            type: item.type
+        };
+        setCustomNodes(prev => [...prev, newNode]);
+        addLog(`NODE ADDED: ${item.label}`);
+    };
+
+    const handleRemoveNode = (index: number) => {
+        setCustomNodes(prev => {
+            const next = [...prev];
+            const removed = next.splice(index, 1);
+            addLog(`NODE REMOVED: ${removed[0].label}`);
+            return next;
+        });
+    };
+
+    const toggleBuildMode = () => {
+        setIsBuildMode(!isBuildMode);
+        if (!isBuildMode) {
+            // Entering build mode: start fresh or with current
+            setCustomNodes(nodes);
+            addLog("ENTERED BUILD MODE");
+        } else {
+            // Exiting build mode: apply changes
+            setNodes(customNodes);
+            addLog("EXITED BUILD MODE - FLOW UPDATED");
+        }
     };
 
     // Node Positions (Fixed Layout)
@@ -445,6 +584,49 @@ export default function ProcessSimulator() {
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
+                                    {/* Tab Toggle */}
+                                    <div className="bg-slate-900 border border-slate-700 p-1 rounded-lg flex items-center mr-2">
+                                        <button
+                                            onClick={() => { setActiveTab("process"); setIsBuildMode(false); }}
+                                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-2 ${activeTab === "process" && !isBuildMode ? "bg-slate-700 text-white" : "text-slate-500 hover:text-slate-300"}`}
+                                        >
+                                            <Layers size={14} />
+                                            PROCESS
+                                        </button>
+                                        <button
+                                            onClick={() => { setIsBuildMode(true); setActiveTab("process"); }}
+                                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-2 ${isBuildMode ? "bg-cyan-600 text-white shadow-lg shadow-cyan-900/50" : "text-slate-500 hover:text-slate-300"}`}
+                                        >
+                                            <Plus size={14} />
+                                            BUILDER
+                                        </button>
+                                        <button
+                                            onClick={() => { setActiveTab("iot"); setIsBuildMode(false); }}
+                                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-2 ${activeTab === "iot" ? "bg-blue-600 text-white shadow-lg shadow-blue-900/50" : "text-slate-500 hover:text-slate-300"}`}
+                                        >
+                                            <LayoutDashboard size={14} />
+                                            IoT CLUSTER
+                                        </button>
+                                    </div>
+
+                                    <div className="w-px h-6 bg-slate-800 mx-2" />
+
+                                    {/* View Mode Toggle */}
+                                    <div className={`bg-slate-900 border border-slate-700 p-1 rounded-lg flex items-center mr-2 transition-opacity ${activeTab === "iot" ? "opacity-30 pointer-events-none" : "opacity-100"}`}>
+                                        <button
+                                            onClick={() => setViewMode("2D")}
+                                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${viewMode === "2D" ? "bg-slate-700 text-white" : "text-slate-500 hover:text-slate-300"}`}
+                                        >
+                                            2D
+                                        </button>
+                                        <button
+                                            onClick={() => setViewMode("3D")}
+                                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${viewMode === "3D" ? "bg-blue-600 text-white shadow-lg shadow-blue-900/50" : "text-slate-500 hover:text-slate-300"}`}
+                                        >
+                                            3D TWIN
+                                        </button>
+                                    </div>
+
                                     {isOptimized && (
                                         <button
                                             onClick={() => setShowInput(true)}
@@ -461,115 +643,113 @@ export default function ProcessSimulator() {
                                 </div>
                             </div>
 
-                            {/* Canvas Area - Split for A/B Testing */}
+                            {/* Canvas Area - Split for A/B Testing OR 3D View */}
                             <div className="relative flex-1 bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden min-h-[400px] shadow-inner flex">
 
-                                {/* A/B Split Line */}
-                                {isOptimized && (
-                                    <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-slate-800 z-20 hidden md:block">
-                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900 border border-slate-700 px-3 py-1 rounded-full text-[10px] font-black text-slate-400 whitespace-nowrap">
-                                            VS
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* LEFT: Legacy (Before) - Only visible when optimized and on large screens, or stacked */}
-                                {isOptimized && (
-                                    <div className="w-1/2 border-r border-slate-800 relative hidden md:block bg-red-950/10 grayscale opacity-70">
-                                        <div className="absolute top-4 left-4 z-30 flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                                            <span className="text-red-400/80 text-xs font-bold uppercase tracking-widest">Legacy Process</span>
-                                        </div>
-                                        {/* Legacy Graph Visualization (Simplified) */}
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="relative w-full h-full p-8">
-                                                <svg className="w-full h-full" viewBox="0 0 300 400">
-                                                    <path d="M 50 50 L 250 100 L 80 250 L 220 350" fill="none" stroke="#ef4444" strokeWidth="2" strokeDasharray="5 5" className="opacity-40" />
-                                                    {DEFAULT_NODES.map((node, i) => (
-                                                        <g key={`legacy-${i}`} transform={`translate(${i === 0 ? 50 : i === 1 ? 250 : i === 2 ? 80 : 220}, ${i === 0 ? 50 : i === 1 ? 100 : i === 2 ? 250 : 350})`}>
-                                                            <rect x="-15" y="-15" width="30" height="30" fill="#1e293b" stroke="#7f1d1d" rx="4" />
-                                                            <text y="30" textAnchor="middle" fill="#991b1b" fontSize="10">{node.label.slice(0, 4)}</text>
-                                                        </g>
-                                                    ))}
-                                                </svg>
+                                {activeTab === "iot" ? (
+                                    <IoTDashboard data={iotData} healingStatus={healingStatus} />
+                                ) : viewMode === "3D" ? (
+                                    <FactoryScene nodes={isBuildMode ? customNodes : nodes} isOptimized={isOptimized} metrics={metrics} legacyMetrics={legacyMetrics} />
+                                ) : (
+                                    <>
+                                        {/* LEFT: Legacy (Before) - Only visible when optimized and on large screens, or stacked */}
+                                        {isOptimized && (
+                                            <div className="w-1/2 border-r border-slate-800 relative hidden md:block bg-red-950/10 grayscale opacity-70">
+                                                <div className="absolute top-4 left-4 z-30 flex items-center gap-2">
+                                                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                                                    <span className="text-red-400/80 text-xs font-bold uppercase tracking-widest">Legacy Process</span>
+                                                </div>
+                                                {/* Legacy Graph Visualization (Simplified) */}
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <div className="relative w-full h-full p-8">
+                                                        <svg className="w-full h-full" viewBox="0 0 300 400">
+                                                            <path d="M 50 50 L 250 100 L 80 250 L 220 350" fill="none" stroke="#ef4444" strokeWidth="2" strokeDasharray="5 5" className="opacity-40" />
+                                                            {(isBuildMode ? customNodes : DEFAULT_NODES).map((node, i) => (
+                                                                <g key={`legacy-${i}`} transform={`translate(${i === 0 ? 50 : i === 1 ? 250 : i === 2 ? 80 : 220}, ${i === 0 ? 50 : i === 1 ? 100 : i === 2 ? 250 : 350})`}>
+                                                                    <rect x="-15" y="-15" width="30" height="30" fill="#1e293b" stroke="#7f1d1d" rx="4" />
+                                                                    <text y="30" textAnchor="middle" fill="#991b1b" fontSize="10">{node.label.slice(0, 4)}</text>
+                                                                </g>
+                                                            ))}
+                                                        </svg>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                )}
+                                        )}
 
-                                {/* RIGHT: AI Optimized (After) */}
-                                <div className={`relative ${isOptimized ? "w-full md:w-1/2" : "w-full"}`}>
-                                    <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
+                                        {/* RIGHT: AI Optimized (After) */}
+                                        <div className={`relative ${isOptimized ? "w-full md:w-1/2" : "w-full"}`}>
+                                            <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
 
-                                    {isOptimized && (
-                                        <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_#22d3ee]" />
-                                            <span className="text-cyan-400 text-xs font-bold uppercase tracking-widest">AI Optimized</span>
-                                        </div>
-                                    )}
-
-                                    {isLoading && (
-                                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm">
-                                            <Loader2 className="w-12 h-12 text-cyan-500 animate-spin mb-4" />
-                                            <p className="text-cyan-400 font-mono text-sm animate-pulse">AI PROCESSING...</p>
-                                        </div>
-                                    )}
-
-                                    {/* Optimization Result Logic */}
-                                    {isOptimized && (
-                                        <div className="absolute bottom-4 right-4 bg-cyan-500 text-slate-900 px-4 py-2 rounded-lg font-black text-sm shadow-[0_0_20px_rgba(34,211,238,0.4)] animate-bounce z-40">
-                                            +{(metrics.efficiency - legacyMetrics.efficiency).toFixed(0)}% GAIN
-                                        </div>
-                                    )}
-
-                                    <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 350 550" preserveAspectRatio="xMidYMid meet">
-                                        <AnimatePresence mode="wait">
-                                            {!isOptimized ? (
-                                                <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="standard">
-                                                    <path d="M 40 100 L 310 50 L 100 400 L 300 450" fill="none" stroke="#64748b" strokeWidth="2" strokeDasharray="4 4" className="opacity-40" />
-                                                </motion.g>
-                                            ) : (
-                                                <motion.g initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: 1.5 }} key="optimized">
-                                                    <path d="M 175 50 L 175 150 L 175 250 L 175 450" fill="none" stroke="#22d3ee" strokeWidth="3" className="drop-shadow-[0_0_15px_rgba(34,211,238,0.6)]" />
-                                                    <circle r="3" fill="white" className="animate-[follow-path-vertical_2s_linear_infinite]">
-                                                        <animateMotion path="M 175 50 L 175 150 L 175 250 L 175 450" dur="1s" repeatCount="indefinite" />
-                                                    </circle>
-                                                </motion.g>
+                                            {isOptimized && (
+                                                <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
+                                                    <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_#22d3ee]" />
+                                                    <span className="text-cyan-400 text-xs font-bold uppercase tracking-widest">AI Optimized</span>
+                                                </div>
                                             )}
-                                        </AnimatePresence>
-                                    </svg>
 
-                                    {nodes.map((node, i) => {
-                                        // Simplified Vertical Layout for Split View
-                                        const pos = isOptimized
-                                            ? { x: 175, y: 80 + (i * 110) }
-                                            : (i === 0 ? { x: 40, y: 100 } : i === 1 ? { x: 310, y: 50 } : i === 2 ? { x: 100, y: 400 } : { x: 300, y: 450 });
+                                            {isLoading && (
+                                                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm">
+                                                    <Loader2 className="w-12 h-12 text-cyan-500 animate-spin mb-4" />
+                                                    <p className="text-cyan-400 font-mono text-sm animate-pulse">AI PROCESSING...</p>
+                                                </div>
+                                            )}
 
-                                        return (
-                                            <motion.div
-                                                key={node.id}
-                                                initial={false}
-                                                animate={{ x: pos.x, y: pos.y }}
-                                                transition={{ type: "spring", stiffness: 80, damping: 15 }}
-                                                className={`absolute -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-xl flex flex-col items-center justify-center gap-1 z-10 border-2 transition-all ${isOptimized
-                                                    ? "bg-slate-900/90 border-cyan-500 shadow-[0_0_30px_rgba(34,211,238,0.3)]"
-                                                    : "bg-slate-900 border-slate-700 opacity-80 grayscale"
-                                                    }`}
-                                                style={{ left: 0, top: 0 }} // Positioning controlled by motion.div animate
-                                            >
-                                                <div className={isOptimized ? "text-cyan-400" : "text-slate-500"}>
-                                                    {/* Resize icon for small nodes */}
-                                                    {node.icon}
+                                            {/* Optimization Result Logic */}
+                                            {isOptimized && (
+                                                <div className="absolute bottom-4 right-4 bg-cyan-500 text-slate-900 px-4 py-2 rounded-lg font-black text-sm shadow-[0_0_20px_rgba(34,211,238,0.4)] animate-bounce z-40">
+                                                    +{(metrics.efficiency - legacyMetrics.efficiency).toFixed(0)}% GAIN
                                                 </div>
-                                                <div className={`text-[6px] font-black uppercase tracking-tighter text-center px-1 leading-tight ${isOptimized ? "text-cyan-100" : "text-slate-500"}`}>
-                                                    {node.label}
-                                                </div>
-                                            </motion.div>
-                                        );
-                                    })}
-                                </div>
+                                            )}
+
+                                            <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 350 550" preserveAspectRatio="xMidYMid meet">
+                                                <AnimatePresence mode="wait">
+                                                    {!isOptimized ? (
+                                                        <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="standard">
+                                                            <path d="M 40 100 L 310 50 L 100 400 L 300 450" fill="none" stroke="#64748b" strokeWidth="2" strokeDasharray="4 4" className="opacity-40" />
+                                                        </motion.g>
+                                                    ) : (
+                                                        <motion.g initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: 1.5 }} key="optimized">
+                                                            <path d="M 175 50 L 175 150 L 175 250 L 175 450" fill="none" stroke="#22d3ee" strokeWidth="3" className="drop-shadow-[0_0_15px_rgba(34,211,238,0.6)]" />
+                                                            <circle r="3" fill="white" className="animate-[follow-path-vertical_2s_linear_infinite]">
+                                                                <animateMotion path="M 175 50 L 175 150 L 175 250 L 175 450" dur="1s" repeatCount="indefinite" />
+                                                            </circle>
+                                                        </motion.g>
+                                                    )}
+                                                </AnimatePresence>
+                                            </svg>
+
+                                            {(isBuildMode ? customNodes : nodes).map((node, i) => {
+                                                // Simplified Vertical Layout for Split View
+                                                const pos = isOptimized
+                                                    ? { x: 175, y: 80 + (i * 110) }
+                                                    : (i === 0 ? { x: 40, y: 100 } : i === 1 ? { x: 310, y: 50 } : i === 2 ? { x: 100, y: 400 } : { x: 300, y: 450 });
+
+                                                return (
+                                                    <motion.div
+                                                        key={`${node.id}-${i}`}
+                                                        initial={false}
+                                                        animate={{ x: pos.x, y: pos.y }}
+                                                        transition={{ type: "spring", stiffness: 80, damping: 15 }}
+                                                        className={`absolute -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-xl flex flex-col items-center justify-center gap-1 z-10 border-2 transition-all ${isOptimized
+                                                            ? "bg-slate-900/90 border-cyan-500 shadow-[0_0_30px_rgba(34,211,238,0.3)]"
+                                                            : "bg-slate-900 border-slate-700 opacity-80 grayscale"
+                                                            }`}
+                                                        style={{ left: 0, top: 0 }} // Positioning controlled by motion.div animate
+                                                    >
+                                                        <div className={isOptimized ? "text-cyan-400" : "text-slate-500"}>
+                                                            {/* Resize icon for small nodes */}
+                                                            {node.icon}
+                                                        </div>
+                                                        <div className={`text-[6px] font-black uppercase tracking-tighter text-center px-1 leading-tight ${isOptimized ? "text-cyan-100" : "text-slate-500"}`}>
+                                                            {node.label}
+                                                        </div>
+                                                    </motion.div>
+                                                );
+                                            })}
+                                        </div>
+                                    </>
+                                )}
                             </div>
-
 
                             {/* AI Analysis Text */}
                             {isOptimized && displayedAnalysis && (
@@ -586,8 +766,34 @@ export default function ProcessSimulator() {
                             )}
                         </div>
 
-                        {/* Right: Metrics */}
+                        {/* Right: Metrics & Agents */}
                         <div className="w-full lg:w-80 flex flex-col gap-6">
+
+                            {/* Agents Dialogue Terminal */}
+                            <div className="flex-1 min-h-[250px] relative">
+                                <div className={`absolute inset-0 transition-opacity duration-300 ${isBuildMode ? "opacity-100 z-10" : "opacity-0 pointer-events-none"}`}>
+                                    <NodePalette
+                                        onAddNode={handleAddNode}
+                                        currentNodes={customNodes}
+                                        onRemoveNode={handleRemoveNode}
+                                    />
+                                    {customNodes.length > 0 && (
+                                        <div className="absolute bottom-4 left-4 right-4 z-20">
+                                            <button
+                                                onClick={() => handleSimulate()}
+                                                className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-black py-3 rounded-xl shadow-lg shadow-cyan-900/40 flex items-center justify-center gap-2 transition-all active:scale-95 group"
+                                            >
+                                                <Bot size={18} className="group-hover:rotate-12 transition-transform" />
+                                                CUSTOM OPTIMIZE
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className={`absolute inset-0 transition-opacity duration-300 ${!isBuildMode ? "opacity-100 z-10" : "opacity-0 pointer-events-none"}`}>
+                                    <AgentTerminal messages={agentMessages} />
+                                </div>
+                            </div>
+
                             <div className="p-6 bg-slate-950 rounded-2xl border border-slate-800 relative overflow-hidden">
                                 <div className="absolute inset-0 bg-cyan-500/5 animate-pulse" />
                                 <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 relative z-10">Real-time Analytics</h3>
@@ -622,7 +828,7 @@ export default function ProcessSimulator() {
                             </div>
 
                             {/* Log */}
-                            <div className="flex-1 bg-black rounded-2xl border border-slate-800 p-4 font-mono text-xs flex flex-col min-h-[250px] shadow-inner relative">
+                            <div className="flex-1 bg-black rounded-2xl border border-slate-800 p-4 font-mono text-xs flex flex-col min-h-[200px] shadow-inner relative">
                                 <div className="text-green-500 border-b border-green-900/30 pb-2 mb-2 uppercase tracking-widest font-bold">System_Log.txt</div>
                                 <div className="flex-1 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-slate-800" ref={logContainerRef}>
                                     {logs.map((log) => (
@@ -634,10 +840,9 @@ export default function ProcessSimulator() {
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
-            </div >
-        </section >
+            </div>
+        </section>
     );
 }
