@@ -137,6 +137,22 @@ export default function ROICalculator() {
         doc.text("SNPE Official | Intelligent Process Automation", 20, footerY + 10);
         doc.text("Contact: optimization@snpe.com", pageWidth - 20, footerY + 10, { align: "right" });
 
+        // Send notification to ok@snpe.kr
+        try {
+            await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    company,
+                    name,
+                    phone,
+                    content: `[ROI 리포트 다운로드 알림]\n연간 예상 절감액: ₩${(savings / 10000).toLocaleString()}만원\n생산성 향상: +${efficiencyBoost.toFixed(1)}%\n연간 생산량: ${production.toLocaleString()} Units\n\n해당 고객이 시뮬레이션 리포트를 다운로드했습니다.`
+                }),
+            });
+        } catch (e) {
+            console.error("Failed to send ROI download notification", e);
+        }
+
         doc.save("SNPE_Optimization_Report.pdf");
         setIsGenerating(false);
     };

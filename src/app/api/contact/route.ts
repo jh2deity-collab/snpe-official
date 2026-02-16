@@ -37,10 +37,14 @@ export async function POST(req: Request) {
             },
         });
 
+        const isGuideRequest = content.includes("[지능형 견적 신청]");
+        const isROIRequest = content.includes("[ROI 리포트 다운로드 알림]");
+        const category = isGuideRequest ? "가이드 리포트" : isROIRequest ? "ROI 리포트" : "일반 상담";
+
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: "ok@snpe.kr",
-            subject: `[SNPE 웹사이트 문의] ${company || "개인"} - ${name}님`,
+            subject: `[SNPE ${category}] ${company || "개인"} - ${name}님`,
             text: `
         회사명: ${company || "미입력"}
         성함: ${name}
