@@ -527,7 +527,7 @@ export default function ProcessSimulator() {
                 </div>
 
                 {/* Main Interface */}
-                <div className="relative w-full max-w-7xl mx-auto bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] border border-slate-700 shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden">
+                <div className="relative w-full max-w-7xl mx-auto bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] border border-slate-700 shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-x-auto xl:overflow-hidden">
 
                     {/* Status Bar */}
                     <div className="h-12 bg-slate-950 border-b border-slate-800 flex items-center justify-between px-6">
@@ -545,7 +545,7 @@ export default function ProcessSimulator() {
                         </div>
                     </div>
 
-                    <div className="p-4 md:p-8 flex flex-col lg:flex-row gap-8 relative z-20">
+                    <div className="p-4 md:p-8 flex flex-col xl:flex-row gap-8 relative z-20">
 
                         {/* Ver 4.0: Holographic Command HUD Overlay */}
                         <AnimatePresence>
@@ -718,7 +718,7 @@ export default function ProcessSimulator() {
                         </AnimatePresence>
 
                         {/* Middle: Visualization (Canvas) */}
-                        <div className="flex-[2] flex flex-col gap-6">
+                        <div className="flex-1 xl:flex-[2] min-w-0 flex flex-col gap-6">
                             {/* Toolbar */}
                             <div className="flex justify-between items-center">
                                 <div>
@@ -1003,10 +1003,44 @@ export default function ProcessSimulator() {
                                     </p>
                                 </motion.div>
                             )}
+                            {/* Ver 4.0: Time-Machine Slider (Inside Left Column) */}
+                            <div className="mt-auto pt-6">
+                                <div className="bg-slate-950/50 backdrop-blur-xl border border-white/5 rounded-2xl p-4 flex flex-col gap-3">
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <History size={14} className="text-cyan-400" />
+                                            <span className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Digital Twin Time-Machine</span>
+                                        </div>
+                                        <span className="font-mono text-[11px] text-cyan-400">
+                                            {timeValue === 0 ? "REAL-TIME" : timeValue > 0 ? `PREDICTION: +${timeValue}h` : `HISTORICAL: ${timeValue}h`}
+                                        </span>
+                                    </div>
+                                    <div className="relative h-6 flex items-center">
+                                        <div className="absolute inset-0 h-1.5 bg-slate-900 rounded-full my-auto border border-white/5" />
+                                        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-cyan-500/50 z-10" />
+                                        <input
+                                            type="range"
+                                            min="-24"
+                                            max="24"
+                                            value={timeValue}
+                                            onChange={(e) => setTimeValue(parseInt(e.target.value))}
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                                        />
+                                        <motion.div
+                                            animate={{
+                                                left: `${((timeValue + 24) / 48) * 100}%`,
+                                                scale: timeValue !== 0 ? 1.2 : 1,
+                                                boxShadow: timeValue !== 0 ? "0 0 20px rgba(34, 211, 238, 0.8)" : "0 0 10px rgba(34, 211, 238, 0.4)"
+                                            }}
+                                            className="absolute w-4 h-4 bg-cyan-500 rounded-full shadow-[0_0_15px_rgba(34,211,238,0.8)] -translate-x-1/2 z-10 pointer-events-none"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Right: Metrics & Agents */}
-                        <div className="w-full lg:w-80 flex flex-col gap-4">
+                        <div className="w-full xl:w-80 flex-shrink-0 flex flex-col gap-4">
 
                             {/* Agents Dialogue Terminal */}
                             <div className="h-[280px] relative">
@@ -1119,40 +1153,7 @@ export default function ProcessSimulator() {
                             </div>
                         </div>
 
-                        {/* Ver 4.0: Time-Machine Slider */}
-                        <div className="px-8 pb-8">
-                            <div className="bg-slate-950/50 backdrop-blur-xl border border-white/5 rounded-2xl p-4 flex flex-col gap-3">
-                                <div className="flex justify-between items-center">
-                                    <div className="flex items-center gap-2">
-                                        <History size={14} className="text-cyan-400" />
-                                        <span className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Digital Twin Time-Machine</span>
-                                    </div>
-                                    <span className="font-mono text-[11px] text-cyan-400">
-                                        {timeValue === 0 ? "REAL-TIME" : timeValue > 0 ? `PREDICTION: +${timeValue}h` : `HISTORICAL: ${timeValue}h`}
-                                    </span>
-                                </div>
-                                <div className="relative h-6 flex items-center">
-                                    <div className="absolute inset-0 h-1.5 bg-slate-900 rounded-full my-auto border border-white/5" />
-                                    <div className="absolute left-1/2 top-0 bottom-0 w-px bg-cyan-500/50 z-10" />
-                                    <input
-                                        type="range"
-                                        min="-24"
-                                        max="24"
-                                        value={timeValue}
-                                        onChange={(e) => setTimeValue(parseInt(e.target.value))}
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                                    />
-                                    <motion.div
-                                        animate={{
-                                            left: `${((timeValue + 24) / 48) * 100}%`,
-                                            scale: timeValue !== 0 ? 1.2 : 1,
-                                            boxShadow: timeValue !== 0 ? "0 0 20px rgba(34, 211, 238, 0.8)" : "0 0 10px rgba(34, 211, 238, 0.4)"
-                                        }}
-                                        className="absolute w-4 h-4 bg-cyan-500 rounded-full -translate-x-1/2 z-10 pointer-events-none"
-                                    />
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
             </div>
