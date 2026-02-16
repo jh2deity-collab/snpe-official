@@ -29,17 +29,17 @@ export default function Navbar() {
                 </motion.div>
 
                 {/* Desktop Navigation Links */}
-                <div className="hidden lg:flex items-center gap-11 font-bold text-[14px] tracking-[0.1em] text-slate-600 uppercase">
+                <div className="hidden lg:flex items-center gap-11 font-bold text-[18px] tracking-tight text-slate-600">
                     {[
-                        { label: "Services", id: "services" },
-                        { label: "Simulator", id: "simulation" },
-                        { label: "Portfolio", id: "expertise" },
-                        { label: "Insights", id: "insights" }
+                        { label: "주요 서비스", id: "services" },
+                        { label: "시뮬레이션", id: "simulation" },
+                        { label: "수행 실적", id: "expertise" },
+                        { label: "도입 효과", id: "insights" }
                     ].map((item) => (
                         <a
                             key={item.id}
                             href={`#${item.id}`}
-                            className="hover:text-cyan-400 transition-all relative group font-black"
+                            className="hover:text-primary transition-all relative group font-black"
                         >
                             {item.label}
                             <motion.span
@@ -69,8 +69,9 @@ export default function Navbar() {
                         <div className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:left-full transition-all duration-1000" />
                     </motion.button>
 
-                    {/* Mobile Menu Button */}
-                    <div className="lg:hidden">
+                    {/* Mobile Menu Button with Label */}
+                    <div className="lg:hidden flex items-center gap-3">
+                        <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Menu</span>
                         <MenuButton
                             isOpen={isMenuOpen}
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -86,7 +87,7 @@ export default function Navbar() {
                     height: isMenuOpen ? "auto" : 0,
                     opacity: isMenuOpen ? 1 : 0
                 }}
-                className="lg:hidden overflow-hidden bg-slate-900/95 backdrop-blur-2xl border-t border-white/5 absolute top-full left-0 right-0 shadow-2xl"
+                className="lg:hidden overflow-hidden bg-white/98 backdrop-blur-3xl border-t border-slate-100 absolute top-full left-0 right-0 shadow-[0_20px_40px_rgba(0,0,0,0.1)]"
             >
                 <div className="container-custom py-8 flex flex-col gap-6">
                     {[
@@ -109,7 +110,7 @@ export default function Navbar() {
                             document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
                             setIsMenuOpen(false);
                         }}
-                        className="bg-primary text-white px-6 py-4 rounded-xl font-black text-lg uppercase tracking-widest shadow-lg mt-4"
+                        className="bg-primary text-white px-6 py-4 rounded-2xl font-black text-lg uppercase tracking-widest shadow-lg shadow-blue-500/20 mt-4 active:scale-95 transition-all"
                     >
                         상담 신청하기
                     </button>
