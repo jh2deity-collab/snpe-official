@@ -14,7 +14,6 @@ export const metadata: Metadata = {
   keywords: ["에스앤피이", "SNPE", "공장자동화", "스마트팩토리", "프로세스 엔지니어링", "엔지니어링 솔루션"],
 };
 
-import MagneticCursor from "@/components/ui/MagneticCursor";
 import DataStream from "@/components/ui/DataStream";
 import ParticleNetwork from "@/components/ui/ParticleNetwork";
 import AIConcierge from "@/components/ui/AIConcierge";
@@ -36,7 +35,6 @@ export default function RootLayout({
         <AIConcierge />
         <CommandPalette />
         <Minimap />
-        <MagneticCursor />
         {children}
       </body>
     </html>
