@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { MessageSquare, X, Send, Bot, Loader2, User } from "lucide-react";
+import { MessageSquare, X, Send, Bot, Loader2, User, Mic } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 type Message = {
@@ -10,6 +10,14 @@ type Message = {
     sender: "user" | "ai";
     timestamp: Date;
 };
+
+// Speech Recognition Type
+declare global {
+    interface Window {
+        SpeechRecognition: any;
+        webkitSpeechRecognition: any;
+    }
+}
 
 export default function AIConcierge() {
     const [isOpen, setIsOpen] = useState(false);
@@ -23,6 +31,7 @@ export default function AIConcierge() {
         },
     ]);
     const [isTyping, setIsTyping] = useState(false);
+    const [isListening, setIsListening] = useState(false); // Voice State
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -140,6 +149,101 @@ export default function AIConcierge() {
         }
     };
 
+    // Voice Command Handler
+    const startListening = () => {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            alert("Speech recognition is not supported in this browser. Please use Chrome.");
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+
+        recognition.lang = 'ko-KR'; // Korean
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        setIsListening(true);
+        setInputValue(""); // Clear input when starting to listen
+
+        let finalTranscript = "";
+
+        recognition.onresult = (event: any) => {
+            finalTranscript = event.results[0][0].transcript;
+            setInputValue(finalTranscript); // Real-time update
+        };
+
+        recognition.onend = () => {
+            setIsListening(false);
+            if (finalTranscript) {
+                // Automatically send message when speech ends
+                // We need to construct a synthetic event or call logic directly
+                // Calling handleSendMessage with the *current* inputValue state might be tricky due to closure
+                // So we'll call logic directly or ensure inputValue is updated.
+                // Since setInputValue is async, let's verify.
+                // Actually, handleSendMessage uses `inputValue` from state.
+                // But inside this closure, `inputValue` is old.
+                // We can just call a helper that accepts text.
+                submitVoiceMessage(finalTranscript);
+            }
+        };
+
+        recognition.start();
+    };
+
+    const submitVoiceMessage = async (text: string) => {
+        if (!text.trim()) return;
+
+        const userMsg: Message = {
+            id: Date.now().toString(),
+            text: text,
+            sender: "user",
+            timestamp: new Date(),
+        };
+
+        const newMessages = [...messages, userMsg];
+        setMessages(newMessages);
+        setInputValue("");
+        setIsTyping(true);
+
+        try {
+            const apiMessages = newMessages.map(m => ({
+                role: m.sender === 'user' ? 'user' : 'assistant',
+                content: m.text
+            }));
+
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: apiMessages }),
+            });
+
+            if (!response.ok) throw new Error('API request failed');
+
+            const data = await response.json();
+
+            const aiMsg: Message = {
+                id: (Date.now() + 1).toString(),
+                text: data.reply || "죄송합니다. 일시적인 오류가 발생했습니다.",
+                sender: "ai",
+                timestamp: new Date(),
+            };
+
+            setMessages(prev => [...prev, aiMsg]);
+        } catch (error) {
+            console.error(error);
+            const errorMsg: Message = {
+                id: (Date.now() + 1).toString(),
+                text: "죄송합니다. 네트워크 연결 상태를 확인해 주세요.",
+                sender: "ai",
+                timestamp: new Date(),
+            };
+            setMessages(prev => [...prev, errorMsg]);
+        } finally {
+            setIsTyping(false);
+        }
+    };
+
     return (
         <div className={`fixed z-[100] font-sans ${isOpen ? "inset-0 md:inset-auto md:bottom-8 md:right-8 flex items-center justify-center md:block bg-black/50 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none" : "bottom-8 right-8"}`}>
             <AnimatePresence>
@@ -244,12 +348,19 @@ export default function AIConcierge() {
                                     type="text"
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
-                                    placeholder="무엇이든 물어보세요..."
-                                    className="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 focus:bg-slate-800 transition-all placeholder:text-slate-500"
+                                    placeholder={isListening ? "듣고 있습니다..." : "무엇이든 물어보세요..."}
+                                    className={`flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 focus:bg-slate-800 transition-all placeholder:text-slate-500 ${isListening ? "border-green-500/50 animate-pulse bg-green-900/10 placeholder:text-green-400" : ""}`}
                                 />
                                 <button
+                                    type="button"
+                                    onClick={startListening}
+                                    className={`p-3 rounded-xl transition-colors shrink-0 ${isListening ? "bg-red-500/20 text-red-400 animate-pulse" : "bg-slate-800 hover:bg-slate-700 text-slate-400"}`}
+                                >
+                                    {isListening ? <Loader2 size={18} className="animate-spin" /> : <Mic size={18} />}
+                                </button>
+                                <button
                                     type="submit"
-                                    disabled={!inputValue.trim() || isTyping}
+                                    disabled={(!inputValue.trim() && !isListening) || isTyping}
                                     className="p-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-900/30"
                                 >
                                     <Send size={18} />
@@ -270,12 +381,14 @@ export default function AIConcierge() {
             </motion.button>
 
             {/* Ping Animation when closed */}
-            {!isOpen && messages.length === 1 && (
-                <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-3 w-3 pointer-events-none">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
-                </span>
-            )}
-        </div>
+            {
+                !isOpen && messages.length === 1 && (
+                    <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-3 w-3 pointer-events-none">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                    </span>
+                )
+            }
+        </div >
     );
 }
