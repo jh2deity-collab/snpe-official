@@ -52,6 +52,9 @@ export default function ProcessSimulator() {
     const [stressStatus, setStressStatus] = useState<"idle" | "failing" | "recovering">("idle");
     const [mttr, setMttr] = useState(0);
     const [isMuted, setIsMuted] = useState(false);
+    const [isCommandOpen, setIsCommandOpen] = useState(false);
+    const [commandInput, setCommandInput] = useState("");
+    const [timeValue, setTimeValue] = useState(0); // -100 to 100 for time scrub
     const { playSound } = useSoundEffect();
 
     const play = (type: any) => {
@@ -78,8 +81,8 @@ export default function ProcessSimulator() {
     const [legacyMetrics, setLegacyMetrics] = useState({ efficiency: 30, throughput: 80, uptime: 75 });
 
     const [logs, setLogs] = useState<LogEntry[]>([
-        { id: 1, time: "00:00:00", message: "SYSTEM READY" },
-        { id: 2, time: "00:00:01", message: "WAITING FOR INPUT..." }
+        { id: 1, time: "00:00:00", message: "SOVEREIGN AI KERNEL V4.0 ACTIVE" },
+        { id: 2, time: "00:00:01", message: "COMMAND CENTER READY" }
     ]);
     const [aiAnalysis, setAiAnalysis] = useState("");
     const [displayedAnalysis, setDisplayedAnalysis] = useState("");
@@ -301,6 +304,13 @@ export default function ProcessSimulator() {
             addLog(`VOICE COMMAND RECEIVED: "${voiceInput}"`);
             addLog("AI PARSING INSTRUCTION...");
             play("scan");
+
+            // Ver 4.0: Goal-based AI interpretation (Simplified Mockup for Demo)
+            if (voiceInput.includes("효율") || voiceInput.includes("efficiency")) {
+                pushAgentMsg("Optimizer", "GOAL IDENTIFIED: MAXIMIZE THROUGHPUT & EFFICIENCY", "info");
+            } else if (voiceInput.includes("ESG") || voiceInput.includes("탄소") || voiceInput.includes("carbon")) {
+                pushAgentMsg("Optimizer", "GOAL IDENTIFIED: MINIMIZE CARBON FOOTPRINT", "success");
+            }
         } else {
             addLog(`ANALYZING PARAMETERS: ${industry} / ${problem}...`);
             play("click");
@@ -482,9 +492,23 @@ export default function ProcessSimulator() {
         <section id="simulation" className="py-24 md:py-32 bg-slate-950 relative overflow-hidden">
             {/* Backgrounds */}
             <div className="absolute inset-0 z-0 pointer-events-none">
-                <img src="/images/simulation-bg.png" alt="BG" className="w-full h-full object-cover opacity-20 mix-blend-color-dodge" />
+                <img src="/images/simulation-bg.png" alt="BG" className="w-full h-full object-cover opacity-20 mix-blend-color-dodge transition-all duration-1000" style={{ filter: stressStatus !== "idle" ? "hue-rotate(300deg) saturate(2)" : "none" }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent" />
                 <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.05)_1px,transparent_1px)] bg-[size:100px_100px]" />
+                {/* Glassmorphism Noise Overlay */}
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]" />
+
+                {/* Dynamic Ambient Light */}
+                <motion.div
+                    animate={{
+                        background: stressStatus === "failing"
+                            ? "radial-gradient(circle at 50% 50%, rgba(239, 68, 68, 0.1) 0%, transparent 70%)"
+                            : isOptimized
+                                ? "radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.05) 0%, transparent 70%)"
+                                : "none"
+                    }}
+                    className="absolute inset-0 pointer-events-none"
+                />
             </div>
 
             <div className="container-custom relative z-10">
@@ -521,7 +545,65 @@ export default function ProcessSimulator() {
                         </div>
                     </div>
 
-                    <div className="p-4 md:p-8 flex flex-col lg:flex-row gap-8 relative">
+                    <div className="p-4 md:p-8 flex flex-col lg:flex-row gap-8 relative z-20">
+
+                        {/* Ver 4.0: Holographic Command HUD Overlay */}
+                        <AnimatePresence>
+                            {isCommandOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="absolute inset-x-8 top-8 z-[70] h-[200px] flex items-center justify-center"
+                                >
+                                    <motion.div
+                                        initial={{ y: -20, scale: 0.95 }}
+                                        animate={{ y: 0, scale: 1 }}
+                                        className="w-full max-w-2xl bg-slate-950/80 backdrop-blur-3xl border-2 border-cyan-500/50 rounded-2xl p-6 shadow-[0_0_50px_rgba(34,211,238,0.3)] relative overflow-hidden"
+                                    >
+                                        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.05)_1px,transparent_1px)] bg-[size:100%_4px] opacity-20 pointer-events-none" />
+
+                                        <div className="flex items-center gap-4 mb-4">
+                                            <div className="p-2 bg-cyan-500/20 rounded-lg">
+                                                <Bot size={24} className="text-cyan-400 animate-pulse" />
+                                            </div>
+                                            <div>
+                                                <h4 className="text-cyan-400 font-black text-sm uppercase tracking-[0.2em]">Autonoumous Optimization Copilot</h4>
+                                                <p className="text-slate-400 text-xs">AI 시뮬레이터에 자연어로 명령을 내리세요. (예: "효율을 최대로 올려줘")</p>
+                                            </div>
+                                            <button
+                                                onClick={() => setIsCommandOpen(false)}
+                                                className="ml-auto text-slate-500 hover:text-white transition-colors"
+                                            >
+                                                <Plus className="rotate-45" />
+                                            </button>
+                                        </div>
+
+                                        <div className="relative">
+                                            <input
+                                                autoFocus
+                                                type="text"
+                                                value={commandInput}
+                                                onChange={(e) => setCommandInput(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter" && commandInput) {
+                                                        handleSimulate(commandInput);
+                                                        setCommandInput("");
+                                                        setIsCommandOpen(false);
+                                                    }
+                                                }}
+                                                placeholder="COMMAND INPUT SIGNAL..."
+                                                className="w-full bg-slate-900/50 border border-cyan-500/30 rounded-xl px-5 py-4 text-cyan-100 placeholder:text-cyan-900/50 outline-none focus:border-cyan-400 transition-all font-mono tracking-widest text-lg"
+                                            />
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
+                                                <span className="text-[10px] font-bold text-cyan-600 uppercase">Awaiting instruction...</span>
+                                                <div className="w-2 h-2 bg-cyan-500 rounded-full animate-ping" />
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
                         {/* Input Overlay (AnimatePresence) */}
                         <AnimatePresence>
@@ -725,6 +807,17 @@ export default function ProcessSimulator() {
                                         </button>
                                     </div>
 
+                                    <div className="w-px h-6 bg-slate-800 mx-2" />
+
+                                    {/* Ver 4.0: Command HUD Toggle */}
+                                    <button
+                                        onClick={() => { setIsCommandOpen(true); play("click"); }}
+                                        className="px-4 py-1.5 bg-cyan-600/10 border border-cyan-500/30 text-cyan-400 rounded-lg text-[11px] font-black tracking-widest hover:bg-cyan-600/20 transition-all flex items-center gap-2 group"
+                                    >
+                                        <Bot size={14} className="group-hover:rotate-12 transition-transform" />
+                                        COMMAND
+                                    </button>
+
                                     {isOptimized && (
                                         <button
                                             onClick={() => setShowInput(true)}
@@ -810,6 +903,19 @@ export default function ProcessSimulator() {
                                                     ) : (
                                                         <motion.g initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: 1.5 }} key="optimized">
                                                             <path d="M 175 50 L 175 150 L 175 250 L 175 450" fill="none" stroke="#22d3ee" strokeWidth="3" className="drop-shadow-[0_0_15px_rgba(34,211,238,0.6)]" />
+                                                            {/* Lidar Scan Effect */}
+                                                            <motion.rect
+                                                                animate={{ y: [0, 500, 0] }}
+                                                                transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+                                                                x="0" width="350" height="2" fill="url(#lidarGradient)" className="opacity-30"
+                                                            />
+                                                            <defs>
+                                                                <linearGradient id="lidarGradient" x1="0" x2="1" y1="0" y2="0">
+                                                                    <stop offset="0%" stopColor="transparent" />
+                                                                    <stop offset="50%" stopColor="#22d3ee" />
+                                                                    <stop offset="100%" stopColor="transparent" />
+                                                                </linearGradient>
+                                                            </defs>
                                                             <circle r="3" fill="white" className="animate-[follow-path-vertical_2s_linear_infinite]">
                                                                 <animateMotion path="M 175 50 L 175 150 L 175 250 L 175 450" dur="1s" repeatCount="indefinite" />
                                                             </circle>
@@ -851,6 +957,19 @@ export default function ProcessSimulator() {
                                                                 )}
                                                                 {/* Explainable AI Overlay */}
                                                                 <NeuralTrace isActive={isDeepLogic && isOptimized} nodeLabel={node.label} />
+
+                                                                {/* Ver 4.0: Predictive Maintenance Heatmap (Wear & Tear) */}
+                                                                <motion.div
+                                                                    animate={{
+                                                                        boxShadow: isOptimized && !isMuted ? [
+                                                                            "0 0 0px rgba(239, 68, 68, 0)",
+                                                                            `0 0 ${stressStatus === "failing" ? 40 : 15}px rgba(239, 68, 68, ${stressStatus === "failing" ? 0.6 : 0.2})`,
+                                                                            "0 0 0px rgba(239, 68, 68, 0)"
+                                                                        ] : "none"
+                                                                    }}
+                                                                    transition={{ repeat: Infinity, duration: 2 }}
+                                                                    className="absolute inset-0 rounded-2xl pointer-events-none"
+                                                                />
 
                                                                 {/* Stress Effect Overlay */}
                                                                 {stressStatus === "failing" && (
@@ -996,6 +1115,41 @@ export default function ProcessSimulator() {
                                             <span className="text-green-400">{log.message}</span>
                                         </div>
                                     ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Ver 4.0: Time-Machine Slider */}
+                        <div className="px-8 pb-8">
+                            <div className="bg-slate-950/50 backdrop-blur-xl border border-white/5 rounded-2xl p-4 flex flex-col gap-3">
+                                <div className="flex justify-between items-center">
+                                    <div className="flex items-center gap-2">
+                                        <History size={14} className="text-cyan-400" />
+                                        <span className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Digital Twin Time-Machine</span>
+                                    </div>
+                                    <span className="font-mono text-[11px] text-cyan-400">
+                                        {timeValue === 0 ? "REAL-TIME" : timeValue > 0 ? `PREDICTION: +${timeValue}h` : `HISTORICAL: ${timeValue}h`}
+                                    </span>
+                                </div>
+                                <div className="relative h-6 flex items-center">
+                                    <div className="absolute inset-0 h-1.5 bg-slate-900 rounded-full my-auto border border-white/5" />
+                                    <div className="absolute left-1/2 top-0 bottom-0 w-px bg-cyan-500/50 z-10" />
+                                    <input
+                                        type="range"
+                                        min="-24"
+                                        max="24"
+                                        value={timeValue}
+                                        onChange={(e) => setTimeValue(parseInt(e.target.value))}
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                                    />
+                                    <motion.div
+                                        animate={{
+                                            left: `${((timeValue + 24) / 48) * 100}%`,
+                                            scale: timeValue !== 0 ? 1.2 : 1,
+                                            boxShadow: timeValue !== 0 ? "0 0 20px rgba(34, 211, 238, 0.8)" : "0 0 10px rgba(34, 211, 238, 0.4)"
+                                        }}
+                                        className="absolute w-4 h-4 bg-cyan-500 rounded-full -translate-x-1/2 z-10 pointer-events-none"
+                                    />
                                 </div>
                             </div>
                         </div>
