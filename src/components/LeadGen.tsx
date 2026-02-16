@@ -75,7 +75,7 @@ export default function LeadGen() {
                             {/* Contact Info Cards */}
                             {[
                                 { icon: <Phone className="text-blue-400" />, label: "전화 문의", val: "(042) 286-3639" },
-                                { icon: <Mail className="text-blue-400" />, label: "이메일", val: "support@snpe.co.kr" },
+                                { icon: <Mail className="text-blue-400" />, label: "이메일", val: "ok@snpe.kr" },
                                 { icon: <MapPin className="text-blue-400" />, label: "본사 주소", val: "대전 유성구 테크노4로 17(관평동), 대덕비즈센터 A동 416호" },
                             ].map((item, idx) => (
                                 <div key={idx} className="flex items-center gap-6 p-6 bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-sm transition-all hover:border-blue-500/30">

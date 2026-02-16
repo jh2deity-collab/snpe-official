@@ -26,7 +26,7 @@ SNPE는 공정 설계부터 시스템 통합까지 제공하는 Total Engineerin
 - 회사명: (주)에스앤피이 (SNPE.Inc)
 - 주요 서비스: 공장 자동화, 프로세스 엔지니어링, 프로그램 개발, CCTV/IoT 시스템
 - 본사 위치: 대전 유성구 테크노4로 17(관평동), 대덕비즈센터 A동 416호
-- 연락처: (042) 286-3639 / support@snpe.co.kr
+- 연락처: (042) 286-3639 / ok@snpe.kr
 - 핵심 가치: Total Integration, Hyper-Customization, Rapid Response
 
 [사이트 내 기능 안내]
