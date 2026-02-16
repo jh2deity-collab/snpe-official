@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Calculator, TrendingUp, DollarSign, Clock, ArrowRight, Info } from "lucide-react";
+import { motion } from "framer-motion";
+import { Calculator, TrendingUp, Clock, ArrowRight, Info, Download, Loader2, FileText } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function ROICalculator() {
     const [production, setProduction] = useState(100000);
@@ -11,6 +13,7 @@ export default function ROICalculator() {
 
     const [savings, setSavings] = useState(0);
     const [efficiencyBoost, setEfficiencyBoost] = useState(0);
+    const [isGenerating, setIsGenerating] = useState(false);
 
     useEffect(() => {
         // Simple logic for simulation
@@ -22,6 +25,95 @@ export default function ROICalculator() {
         setSavings(Math.floor((laborSaving + defectSaving) / 10000) * 10000);
         setEfficiencyBoost(25 + Math.random() * 5);
     }, [production, defectRate, laborCost]);
+
+    const handleDownloadReport = async () => {
+        setIsGenerating(true);
+
+        // Simulate processing delay for effect
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+
+        // 1. Header
+        doc.setFillColor(15, 23, 42); // Slate 950
+        doc.rect(0, 0, pageWidth, 40, 'F');
+
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(22);
+        doc.setFont("helvetica", "bold");
+        doc.text("SNPE PROCESS OPTIMIZATION", 20, 20);
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(148, 163, 184); // Slate 400
+        doc.text(`Reference ID: REF-${Math.floor(Math.random() * 100000)}`, 20, 30);
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, pageWidth - 20, 30, { align: "right" });
+
+        // 2. Executive Summary
+        doc.setTextColor(51, 65, 85); // Slate 700
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("1. Executive Summary", 20, 55);
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        const summaryText = `Based on the simulation parameters provided, integrating SNPE's AI-driven process automation is projected to deliver significant operational improvements. The analysis indicates a potential annual saving of ${(savings / 10000).toLocaleString()}0,000 KRW, driven primarily by a ${efficiencyBoost.toFixed(1)}% increase in productivity and a drastic reduction in defect rates. We recommend an immediate technical feasibility study to realize these gains.`;
+        doc.text(doc.splitTextToSize(summaryText, pageWidth - 40), 20, 65);
+
+        // 3. Input Parameters (Table)
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("2. Simulation Parameters", 20, 95);
+
+        autoTable(doc, {
+            startY: 100,
+            head: [['Parameter', 'Value', 'Unit']],
+            body: [
+                ['Annual Production', production.toLocaleString(), 'Units'],
+                ['Current Defect Rate', `${defectRate}%`, 'Percentage'],
+                ['Operational Cost', `${(laborCost / 10000).toLocaleString()}0,000`, 'KRW/Year'],
+            ],
+            headStyles: { fillColor: [15, 23, 42], textColor: 255, fontStyle: 'bold' },
+            bodyStyles: { textColor: 50 },
+            theme: 'grid',
+        });
+
+        // 4. ROI Projections (Table)
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        // @ts-ignore
+        doc.text("3. ROI Projections", 20, doc.lastAutoTable.finalY + 20);
+
+        autoTable(doc, {
+            // @ts-ignore
+            startY: doc.lastAutoTable.finalY + 25,
+            head: [['Metric', 'Impact', 'Projected Value']],
+            body: [
+                ['Total Annual Savings', 'POSITIVE', `KRW ${(savings / 10000).toLocaleString()}0,000`],
+                ['Productivity Boost', 'INCREASE', `+${efficiencyBoost.toFixed(1)}%`],
+                ['Defect Reduction', 'DECREASE', '-70% (Estimated)'],
+                ['Downtime Reduction', 'DECREASE', '-68% (Estimated)'],
+            ],
+            headStyles: { fillColor: [6, 182, 212], textColor: 255, fontStyle: 'bold' }, // Cyan 500
+            alternateRowStyles: { fillColor: [240, 253, 250] },
+            theme: 'striped',
+        });
+
+        // 5. Footer
+        const footerY = 270;
+        doc.setLineWidth(0.5);
+        doc.setDrawColor(200);
+        doc.line(20, footerY, pageWidth - 20, footerY);
+
+        doc.setFontSize(9);
+        doc.setTextColor(100);
+        doc.text("SNPE Official | Intelligent Process Automation", 20, footerY + 10);
+        doc.text("Contact: optimization@snpe.com", pageWidth - 20, footerY + 10, { align: "right" });
+
+        doc.save("SNPE_Optimization_Report.pdf");
+        setIsGenerating(false);
+    };
 
     return (
         <div className="w-full max-w-4xl mx-auto bg-white rounded-[3rem] p-12 border border-slate-200/60 relative overflow-hidden shadow-2xl shadow-slate-200/50">
@@ -103,7 +195,7 @@ export default function ROICalculator() {
                     <div className="bg-slate-50/50 rounded-[2.5rem] p-10 border border-slate-200/50 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
-                        <div className="space-y-12">
+                        <div className="space-y-8">
                             <div className="text-center space-y-2">
                                 <p className="text-[11px] font-black text-primary uppercase tracking-[0.4em]">Expected Annual Savings</p>
                                 <motion.h2
@@ -116,8 +208,8 @@ export default function ROICalculator() {
                                 </motion.h2>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="p-5 bg-white border border-slate-200/60 rounded-2xl space-y-3 shadow-sm">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="p-4 bg-white border border-slate-200/60 rounded-2xl space-y-2 shadow-sm">
                                     <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
                                         <TrendingUp size={16} />
                                     </div>
@@ -126,7 +218,7 @@ export default function ROICalculator() {
                                         <p className="text-xl font-black text-primary">+{efficiencyBoost.toFixed(1)}%</p>
                                     </div>
                                 </div>
-                                <div className="p-5 bg-white border border-slate-200/60 rounded-2xl space-y-3 shadow-sm">
+                                <div className="p-4 bg-white border border-slate-200/60 rounded-2xl space-y-2 shadow-sm">
                                     <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
                                         <Clock size={16} />
                                     </div>
@@ -138,12 +230,26 @@ export default function ROICalculator() {
                             </div>
 
                             <button
-                                onClick={() => document.getElementById("quote")?.scrollIntoView({ behavior: "smooth" })}
-                                className="w-full py-5 bg-primary text-white rounded-2xl font-black flex items-center justify-center gap-3 group hover:shadow-[0_20px_40px_rgba(30,64,175,0.2)] transition-all"
+                                onClick={handleDownloadReport}
+                                disabled={isGenerating}
+                                className="w-full py-5 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl font-black flex items-center justify-center gap-3 group hover:shadow-xl hover:shadow-slate-900/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                             >
-                                상세 기술 리포트 받기
-                                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                {isGenerating ? (
+                                    <>
+                                        <Loader2 size={18} className="animate-spin" />
+                                        GENERATING REPORT...
+                                    </>
+                                ) : (
+                                    <>
+                                        <FileText size={18} />
+                                        DOWNLOAD PDF REPORT
+                                        <Download size={18} className="group-hover:translate-y-1 transition-transform opacity-50" />
+                                    </>
+                                )}
                             </button>
+                            <p className="text-center text-[10px] text-slate-400 font-medium">
+                                * Detailed technical analysis included
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -151,3 +257,4 @@ export default function ROICalculator() {
         </div>
     );
 }
+

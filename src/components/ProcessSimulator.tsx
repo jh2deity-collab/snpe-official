@@ -2,90 +2,309 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cpu, Settings, Zap, CheckCircle2, Activity, Terminal as TerminalIcon } from "lucide-react";
+import { Cpu, Settings, Zap, CheckCircle2, Activity, Terminal as TerminalIcon, ArrowRight, Loader2, Mic, MicOff, Waves } from "lucide-react";
 
-const UNOPTIMIZED_NODES = [
-    { id: 1, x: 80, y: 300, label: "RAW DATA", icon: <Cpu size={18} /> },
-    { id: 2, x: 400, y: 100, label: "LEGACY CTRL", icon: <Settings size={18} /> },
-    { id: 3, x: 320, y: 450, label: "ENERGY LOSS", icon: <Zap size={18} /> },
-    { id: 4, x: 650, y: 300, label: "FINAL PRODUCT", icon: <CheckCircle2 size={18} /> },
-];
+// Speech Recognition Type
+declare global {
+    interface Window {
+        SpeechRecognition: any;
+        webkitSpeechRecognition: any;
+    }
+}
 
-const OPTIMIZED_NODES = [
-    { id: 1, x: 80, y: 300, label: "SMART INPUT", icon: <Cpu size={18} /> },
-    { id: 2, x: 270, y: 300, label: "AI CONTROL", icon: <Settings size={18} /> },
-    { id: 3, x: 460, y: 300, label: "ECO SYSTEM", icon: <Zap size={18} /> },
-    { id: 4, x: 650, y: 300, label: "OPTIMIZED OUTPUT", icon: <CheckCircle2 size={18} /> },
+// Default Nodes (Fallback)
+const DEFAULT_NODES = [
+    { id: 1, label: "RAW INPUT", icon: <Cpu size={18} /> },
+    { id: 2, label: "PROCESS CTRL", icon: <Settings size={18} /> },
+    { id: 3, label: "SYSTEM LOAD", icon: <Zap size={18} /> },
+    { id: 4, label: "FINAL OUTPUT", icon: <CheckCircle2 size={18} /> },
 ];
 
 export default function ProcessSimulator() {
+    // State
     const [isOptimized, setIsOptimized] = useState(false);
-    const [metrics, setMetrics] = useState({ efficiency: 42, throughput: 120, uptime: 88 });
-    const [logs, setLogs] = useState<string[]>(["SYSTEM READY", "WAITING FOR OPTIMIZATION"]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [showInput, setShowInput] = useState(true);
+
+    // Voice State
+    const [isListening, setIsListening] = useState(false);
+    const [voiceTranscript, setVoiceTranscript] = useState("");
+
+    // User Inputs
+    const [industry, setIndustry] = useState("");
+    const [problem, setProblem] = useState("");
+
+    // Log Type Definition
+    type LogEntry = {
+        id: number;
+        time: string;
+        message: string;
+    };
+
+    // Simulation Data
+    const [nodes, setNodes] = useState(DEFAULT_NODES);
+    const [metrics, setMetrics] = useState({ efficiency: 30, throughput: 80, uptime: 75 });
+    const [targetMetrics, setTargetMetrics] = useState<{ efficiency: number, throughput: number, uptime: number } | null>(null);
+
+    // Legacy (Before AI) Data
+    const [legacyMetrics, setLegacyMetrics] = useState({ efficiency: 30, throughput: 80, uptime: 75 });
+
+    const [logs, setLogs] = useState<LogEntry[]>([
+        { id: 1, time: "00:00:00", message: "SYSTEM READY" },
+        { id: 2, time: "00:00:01", message: "WAITING FOR INPUT..." }
+    ]);
+    const [aiAnalysis, setAiAnalysis] = useState("");
+    const [displayedAnalysis, setDisplayedAnalysis] = useState("");
+
     const logContainerRef = useRef<HTMLDivElement>(null);
 
-    // Simulate real-time data fluctuation
+    // Helper to add log
+    const addLog = (message: string) => {
+        setLogs(prev => [
+            ...prev,
+            {
+                id: Date.now() + Math.random(),
+                time: new Date().toLocaleTimeString('en-US', { hour12: false }),
+                message
+            }
+        ]);
+    };
+
+    // Auto-scroll logs
     useEffect(() => {
+        if (logContainerRef.current) {
+            logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+        }
+    }, [logs]);
+
+    // METRICS SIMULATION ENGINE
+    // Interpolates current metrics towards target metrics with organic noise
+    useEffect(() => {
+        if (!isOptimized || !targetMetrics) return;
+
         const interval = setInterval(() => {
-            setMetrics(prev => ({
-                efficiency: isOptimized ? 98 + Math.random() : 40 + Math.random() * 5,
-                throughput: isOptimized ? 450 + Math.random() * 10 : 110 + Math.random() * 20,
-                uptime: isOptimized ? 99.99 : 85 + Math.random() * 5,
+            setMetrics(prev => {
+                // Calculate distance to target
+                const diffEff = targetMetrics.efficiency - prev.efficiency;
+                const diffThr = targetMetrics.throughput - prev.throughput;
+                const diffUptime = targetMetrics.uptime - prev.uptime;
+
+                // Smooth interpolation factor (0.1 means move 10% of the way per tick)
+                const speed = 0.05;
+
+                // Organic noise
+                const noiseEff = (Math.random() - 0.5) * 0.5;
+                const noiseThr = (Math.random() - 0.5) * 2;
+
+                return {
+                    efficiency: prev.efficiency + (diffEff * speed) + noiseEff,
+                    throughput: prev.throughput + (diffThr * speed) + noiseThr,
+                    uptime: 99.9, // Uptime usually stays high
+                };
+            });
+
+            // Simulate Legacy Metrics (Poor performance, high fluctuation)
+            setLegacyMetrics(prev => {
+                // Legacy stays low and erratic
+                const targetEff = 45; // Low efficiency
+                const targetThr = 60; // Low throughput
+
+                // Drift towards poor targets but with high noise
+                const diffEff = targetEff - prev.efficiency;
+                const diffThr = targetThr - prev.throughput;
+
+                const speed = 0.02; // Slow correction
+                const noise = (Math.random() - 0.5) * 5; // High chaos
+
+                return {
+                    efficiency: Math.max(20, Math.min(60, prev.efficiency + (diffEff * speed) + noise)),
+                    throughput: Math.max(40, Math.min(100, prev.throughput + (diffThr * speed) + noise)),
+                    uptime: prev.uptime > 80 ? prev.uptime - 0.1 : prev.uptime + 0.1, // Fluctuating uptime
+                };
+            });
+
+        }, 100); // Fast ticks for smooth animation
+
+        return () => clearInterval(interval);
+    }, [isOptimized, targetMetrics]);
+
+    // TYPEWRITER EFFECT FOR ANALYSIS
+    useEffect(() => {
+        if (isOptimized && aiAnalysis) {
+            let i = 0;
+            setDisplayedAnalysis("");
+            const interval = setInterval(() => {
+                setDisplayedAnalysis(aiAnalysis.slice(0, i));
+                i++;
+                if (i > aiAnalysis.length) clearInterval(interval);
+            }, 30); // Speed of typing
+            return () => clearInterval(interval);
+        }
+    }, [isOptimized, aiAnalysis]);
+
+    // VOICE COMMAND HANDLER
+    const startListening = () => {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            alert("Speech recognition is not supported in this browser. Please use Chrome.");
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+
+        recognition.lang = 'ko-KR'; // Korean
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        setIsListening(true);
+        setVoiceTranscript("Listening...");
+
+        recognition.onresult = (event: any) => {
+            const transcript = event.results[0][0].transcript;
+            setVoiceTranscript(transcript);
+        };
+
+        recognition.onend = () => {
+            // If we have a transcript, submit it
+            // We need to access the LATEST voiceTranscript value. 
+            // Ideally we pass it directly or capture it from the event.
+            // However, `recognition.onresult` updates state, but `onend` might have closure issues if we access state directly.
+            // So we should rely on the last result event or handle it carefully.
+            // A better pattern for this simple use case:
+            setIsListening(false);
+        };
+
+        // Custom wrapper to handle the result submitting after a pause
+        let finalTranscript = "";
+        recognition.onresult = (event: any) => {
+            finalTranscript = event.results[0][0].transcript;
+            setVoiceTranscript(finalTranscript);
+        }
+        recognition.onend = () => {
+            setIsListening(false);
+            if (finalTranscript) {
+                handleSimulate(finalTranscript);
+            } else {
+                setVoiceTranscript("");
+            }
+        }
+
+        recognition.start();
+    };
+
+
+    const handleSimulate = async (voiceInput?: string) => {
+        // Allow if manual input is filled OR if voice input is provided
+        if ((!industry || !problem) && !voiceInput) return;
+
+        setIsLoading(true);
+        setShowInput(false);
+
+        if (voiceInput) {
+            addLog(`VOICE COMMAND RECEIVED: "${voiceInput}"`);
+            addLog("AI PARSING INSTRUCTION...");
+        } else {
+            addLog(`ANALYZING PARAMETERS: ${industry} / ${problem}...`);
+        }
+
+        try {
+            const res = await fetch('/api/simulate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ industry, problem, voiceInput }),
+            });
+
+            if (!res.ok) throw new Error('Simulation Failed');
+
+            const data = await res.json();
+
+            // If voice input, update the input fields with extracted info
+            if (data.extracted_info) {
+                setIndustry(data.extracted_info.industry);
+                setProblem(data.extracted_info.problem);
+                addLog(`CONTEXT IDENTIFIED: ${data.extracted_info.industry}`);
+            }
+
+            // Transform API nodes to fit UI structure
+            // We map the first 4 nodes from API to our fixed positions
+            const newNodes = data.nodes.slice(0, 4).map((n: any, idx: number) => ({
+                id: idx + 1,
+                label: n.label,
+                icon: idx === 0 ? <Cpu size={18} /> : idx === 1 ? <Settings size={18} /> : idx === 2 ? <Zap size={18} /> : <CheckCircle2 size={18} />
             }));
 
-            if (isOptimized && Math.random() > 0.7) {
-                const newLog = `[${new Date().toLocaleTimeString()}] NODE_${Math.floor(Math.random() * 1000)}: SYNC OK`;
-                setLogs(prev => [...prev.slice(-4), newLog]);
-            }
-        }, 2000);
-        return () => clearInterval(interval);
-    }, [isOptimized]);
+            // Animation Sequence
+            setTimeout(() => {
+                setNodes(newNodes);
+                // Instead of setting metrics instantly, we set the TARGET
+                setTargetMetrics(data.metrics);
+                setLegacyMetrics({ efficiency: 35, throughput: 50, uptime: 88 }); // Set explicitly low starting point for contrast
+                setAiAnalysis(data.analysis);
+                setIsOptimized(true);
+                setIsLoading(false);
+                addLog("OPTIMIZATION COMPLETE");
+                addLog("AI KERNEL ACTIVE");
+                addLog("REAL-TIME MONITORING STARTED");
+            }, 1000);
 
-    const handleToggle = () => {
-        const nextState = !isOptimized;
-        setIsOptimized(nextState);
-        setLogs(prev => [...prev, nextState ? "EXECUTING OPTIMIZATION PROTOCOL..." : "RESETTING CONFIGURATION..."]);
-        if (nextState) {
-            setTimeout(() => setLogs(prev => [...prev, "AI ENGINE ONLINE", "PROCESS RECONFIGURED"]), 1000);
+        } catch (error) {
+            console.error(error);
+            addLog("ERROR: SIMULATION FAILED");
+            addLog("REVERTING TO SAFE MODE");
+            setIsLoading(false);
         }
     };
 
-    const nodes = isOptimized ? OPTIMIZED_NODES : UNOPTIMIZED_NODES;
+    const resetSimulation = () => {
+        setIsOptimized(false);
+        setNodes(DEFAULT_NODES);
+        setMetrics({ efficiency: 30, throughput: 80, uptime: 75 });
+        setLegacyMetrics({ efficiency: 30, throughput: 80, uptime: 75 });
+        setTargetMetrics(null);
+        setAiAnalysis("");
+        setDisplayedAnalysis("");
+        setShowInput(true);
+        addLog("SYSTEM RESET");
+    };
+
+    // Node Positions (Fixed Layout)
+    const nodePositions = [
+        { x: 80, y: 300 },
+        { x: 270, y: 300 }, // Position for Node 2 (Optimized/Unoptimized uses same layout for simplicity now or switch?)
+        { x: 460, y: 300 }, // Let's use the 'clean' layout for optimized and 'messy' for unoptimized logic visually?
+        { x: 650, y: 300 },
+    ];
+    // For unoptimized, we can use the original messy coordinates if we want, but let's stick to clean transition for now or keep logic.
+    // Let's us the logic: isOptimized ? Straight Line : Messy Line.
 
     return (
-        <section id="simulation" className="py-32 bg-slate-950 relative overflow-hidden">
-            {/* Cinematic Background */}
-            <div className="absolute inset-0 z-0">
-                <img
-                    src="/images/simulation-bg.png" // Ensure this image exists
-                    alt="Simulation Background"
-                    className="w-full h-full object-cover opacity-20 mix-blend-color-dodge"
-                />
+        <section id="simulation" className="py-24 md:py-32 bg-slate-950 relative overflow-hidden">
+            {/* Backgrounds */}
+            <div className="absolute inset-0 z-0 pointer-events-none">
+                <img src="/images/simulation-bg.png" alt="BG" className="w-full h-full object-cover opacity-20 mix-blend-color-dodge" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent" />
                 <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.05)_1px,transparent_1px)] bg-[size:100px_100px]" />
             </div>
 
             <div className="container-custom relative z-10">
-                <div className="mb-20 text-center space-y-4">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-900/20 border border-blue-500/30 backdrop-blur-sm"
-                    >
+                {/* Header */}
+                <div className="mb-12 md:mb-20 text-center space-y-4">
+                    <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-900/20 border border-blue-500/30 backdrop-blur-sm">
                         <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_10px_#3b82f6]" />
                         <span className="text-blue-400 font-bold tracking-[0.2em] text-[10px] uppercase">Interactive Digital Twin</span>
                     </motion.div>
                     <h2 className="text-4xl md:text-[3vw] font-black text-white tracking-tighter leading-none">
-                        PROCESS <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 filter drop-shadow-[0_0_20px_rgba(34,211,238,0.4)]">OPTIMIZER</span>
+                        PROCESS <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">OPTIMIZER</span>
                     </h2>
                     <p className="text-slate-400 font-medium text-lg">
-                        가상의 공정 환경에서 <span className="text-cyan-400">AI 최적화</span> 성능을 직접 실험해보세요.
+                        산업 분야와 문제점을 입력하면 <span className="text-cyan-400">AI</span>가 최적의 공정 설계를 제안합니다.
                     </p>
                 </div>
 
-                {/* Control Center Interface */}
+                {/* Main Interface */}
                 <div className="relative w-full max-w-7xl mx-auto bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] border border-slate-700 shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden">
-                    {/* Top Status Bar */}
+
+                    {/* Status Bar */}
                     <div className="h-12 bg-slate-950 border-b border-slate-800 flex items-center justify-between px-6">
                         <div className="flex items-center gap-4">
                             <div className="flex gap-1.5">
@@ -93,113 +312,285 @@ export default function ProcessSimulator() {
                                 <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
                                 <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50" />
                             </div>
-                            <span className="text-[10px] font-mono text-slate-500 tracking-widest">SNPE_OS_KERNEL_V4.2</span>
+                            <span className="text-[10px] font-mono text-slate-500 tracking-widest hidden md:block">SNPE_TWIN_KERNEL_V5.0</span>
                         </div>
                         <div className="flex items-center gap-6">
-                            <div className="text-[10px] font-mono text-cyan-500/70 tracking-widest">
-                                MEM_USAGE: {Math.floor(metrics.uptime)}%
-                            </div>
+                            {isLoading && <span className="text-cyan-400 text-xs font-mono animate-pulse">PROCESSING DATA...</span>}
                             <Activity size={14} className="text-slate-600" />
                         </div>
                     </div>
 
-                    <div className="p-8 flex flex-col lg:flex-row gap-8">
-                        {/* Left: Interactive Canvas */}
-                        <div className="flex-[2] relative flex flex-col gap-6">
-                            {/* Canvas Header */}
-                            <div className="flex justify-between items-end">
+                    <div className="p-4 md:p-8 flex flex-col lg:flex-row gap-8 relative">
+
+                        {/* Input Overlay (AnimatePresence) */}
+                        <AnimatePresence>
+                            {showInput && (
+                                <motion.div
+                                    initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+                                    animate={{ opacity: 1, backdropFilter: "blur(10px)" }}
+                                    exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
+                                    className="absolute inset-0 z-50 bg-slate-950/60 flex items-center justify-center p-4"
+                                >
+                                    <motion.div
+                                        initial={{ scale: 0.9, y: 20 }}
+                                        animate={{ scale: 1, y: 0 }}
+                                        className="bg-slate-900 border border-slate-700/50 p-8 rounded-2xl shadow-2xl w-full max-w-md space-y-6"
+                                    >
+                                        <div className="text-center">
+                                            <h3 className="text-2xl font-black text-white mb-2">시뮬레이션 설정</h3>
+                                            <p className="text-slate-400 text-sm">최적화할 공정 환경을 설정해주세요.</p>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500 uppercase block mb-2">산업 분야</label>
+                                                <input
+                                                    type="text"
+                                                    value={industry}
+                                                    onChange={(e) => setIndustry(e.target.value)}
+                                                    placeholder="예: 자동차 부품 제조, 식품 가공"
+                                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:border-cyan-500 outline-none transition-colors"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500 uppercase block mb-2">현재 문제점 (Bottleneck)</label>
+                                                <input
+                                                    type="text"
+                                                    value={problem}
+                                                    onChange={(e) => setProblem(e.target.value)}
+                                                    placeholder="예: 높은 불량률, 과도한 에너지 비용"
+                                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:border-cyan-500 outline-none transition-colors"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-3">
+                                            {isOptimized && (
+                                                <button onClick={() => setShowInput(false)} className="flex-1 py-3 bg-slate-800 text-slate-300 rounded-xl font-bold hover:bg-slate-700 transition-colors">
+                                                    취소
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => handleSimulate()}
+                                                disabled={!industry || !problem}
+                                                className="flex-1 py-3 bg-cyan-600 text-white rounded-xl font-bold hover:bg-cyan-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                            >
+                                                <Zap size={18} className="fill-white" />
+                                                시뮬레이션 시작
+                                            </button>
+
+                                            {/* Mic Button */}
+                                            <button
+                                                onClick={startListening}
+                                                className="w-14 h-12 flex items-center justify-center bg-slate-800 border border-slate-700 rounded-xl hover:bg-slate-700 hover:border-cyan-500/50 transition-all group"
+                                            >
+                                                <Mic className="text-slate-400 group-hover:text-cyan-400" size={20} />
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Listening Overlay */}
+                        <AnimatePresence>
+                            {isListening && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="absolute inset-0 z-[60] bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center p-4 rounded-[2rem]"
+                                >
+                                    <div className="relative">
+                                        <motion.div
+                                            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                                            transition={{ repeat: Infinity, duration: 1.5 }}
+                                            className="w-24 h-24 rounded-full bg-cyan-500/20 blur-xl absolute inset-0"
+                                        />
+                                        <div className="w-24 h-24 rounded-full border-2 border-cyan-500 flex items-center justify-center relative z-10 bg-slate-900">
+                                            <Mic size={40} className="text-cyan-400" />
+                                        </div>
+                                    </div>
+
+                                    <h3 className="text-2xl font-black text-white mt-8 mb-2">LISTENING...</h3>
+                                    <p className="text-cyan-400 font-mono text-lg h-8">{voiceTranscript}</p>
+
+                                    <div className="mt-8 flex gap-1 h-8 items-end">
+                                        {[...Array(5)].map((_, i) => (
+                                            <motion.div
+                                                key={i}
+                                                animate={{ height: [10, 30, 10] }}
+                                                transition={{ repeat: Infinity, duration: 0.5, delay: i * 0.1 }}
+                                                className="w-2 bg-cyan-500 rounded-full"
+                                            />
+                                        ))}
+                                    </div>
+
+                                    <button
+                                        onClick={() => setIsListening(false)}
+                                        className="mt-12 px-6 py-2 rounded-full border border-slate-700 text-slate-400 text-sm hover:bg-slate-800 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Middle: Visualization (Canvas) */}
+                        <div className="flex-[2] flex flex-col gap-6">
+                            {/* Toolbar */}
+                            <div className="flex justify-between items-center">
                                 <div>
-                                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Current Mode</div>
-                                    <div className={`text-2xl font-black tracking-tight flex items-center gap-3 transition-colors ${isOptimized ? "text-cyan-400" : "text-slate-400"}`}>
-                                        {isOptimized ? (
-                                            <>
-                                                <Zap className="fill-cyan-400" /> AI OPTIMIZED
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Settings className="animate-spin-slow" /> MANUAL
-                                            </>
-                                        )}
+                                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Status</div>
+                                    <div className={`text-xl md:text-2xl font-black tracking-tight flex items-center gap-3 ${isOptimized ? "text-cyan-400" : "text-slate-500"}`}>
+                                        {isOptimized ? <><Zap className="fill-cyan-400" /> AI OPTIMIZED</> : <><Settings /> STANDBY</>}
                                     </div>
                                 </div>
-                                <button
-                                    onClick={handleToggle}
-                                    className={`relative group px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all overflow-hidden ${isOptimized
-                                        ? "bg-cyan-500 text-slate-900 hover:bg-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.4)]"
-                                        : "bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-600"
-                                        }`}
-                                >
-                                    <span className="relative z-10">{isOptimized ? "RESET SIMULATION" : "ACTIVATE AI"}</span>
-                                    {isOptimized && <div className="absolute inset-0 bg-white/20 blur-xl group-hover:translate-x-full transition-transform duration-1000" />}
-                                </button>
-                            </div>
-
-                            {/* Canvas Area */}
-                            <div className="relative flex-1 bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden min-h-[450px] shadow-inner">
-                                {/* Grid & Effects */}
-                                <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
-                                {/* Scanning Line */}
-                                <div className="absolute inset-x-0 h-[2px] bg-cyan-500/30 blur-sm animate-[scan-v_3s_linear_infinite]" />
-
-                                <div className="absolute top-6 right-6 text-right">
-                                    <div className="text-[9px] font-mono text-cyan-900">COORDS: {metrics.efficiency.toFixed(2)}, {metrics.throughput.toFixed(0)}</div>
-                                    <div className="text-[9px] font-mono text-cyan-900">NODES_ACTIVE: {nodes.length}</div>
+                                <div className="flex gap-2">
+                                    {isOptimized && (
+                                        <button
+                                            onClick={() => setShowInput(true)}
+                                            className="px-4 py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-lg border border-slate-700 hover:bg-slate-700 transition-colors"
+                                        >
+                                            파라미터 변경
+                                        </button>
+                                    )}
+                                    {isOptimized && (
+                                        <button onClick={resetSimulation} className="px-4 py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-lg border border-slate-700 hover:bg-slate-700 transition-colors">
+                                            초기화
+                                        </button>
+                                    )}
                                 </div>
-
-                                <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 750 550">
-                                    <AnimatePresence>
-                                        {!isOptimized ? (
-                                            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="messy">
-                                                <path d="M 80 300 L 400 100 L 320 450 L 650 300" fill="none" stroke="#64748b" strokeWidth="2" strokeDasharray="4 4" className="opacity-40" />
-                                            </motion.g>
-                                        ) : (
-                                            <motion.g initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: 1.5, ease: "circOut" }} key="clean">
-                                                <path d="M 80 300 L 270 300 L 460 300 L 650 300" fill="none" stroke="#22d3ee" strokeWidth="3" className="drop-shadow-[0_0_15px_rgba(34,211,238,0.6)]" />
-                                                {/* Data Packets */}
-                                                <circle r="3" fill="white" className="animate-[follow-path_2s_linear_infinite]">
-                                                    <animateMotion path="M 80 300 L 270 300 L 460 300 L 650 300" dur="2s" repeatCount="indefinite" />
-                                                </circle>
-                                            </motion.g>
-                                        )}
-                                    </AnimatePresence>
-                                </svg>
-
-                                {nodes.map((node) => (
-                                    <motion.div
-                                        key={node.id}
-                                        layoutId={`node-${node.id}`}
-                                        animate={{ x: node.x, y: node.y }}
-                                        transition={{ type: "spring", stiffness: 120, damping: 15 }}
-                                        className={`absolute -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-xl flex flex-col items-center justify-center gap-1 z-10 border-2 transition-all group cursor-pointer ${isOptimized
-                                            ? "bg-slate-900/90 border-cyan-500 shadow-[0_0_30px_rgba(34,211,238,0.3)]"
-                                            : "bg-slate-900 border-slate-700 opacity-80 grayscale"
-                                            }`}
-                                        style={{ left: 0, top: 0 }}
-                                    >
-                                        <div className={`transition-colors duration-500 ${isOptimized ? "text-cyan-400" : "text-slate-500"}`}>
-                                            {node.icon}
-                                        </div>
-                                        <div className={`text-[8px] font-black uppercase tracking-tighter ${isOptimized ? "text-cyan-100" : "text-slate-500"}`}>
-                                            {node.label}
-                                        </div>
-                                        {/* Corner Markers */}
-                                        <div className="absolute top-1 left-1 w-1 h-1 bg-current opacity-50" />
-                                        <div className="absolute top-1 right-1 w-1 h-1 bg-current opacity-50" />
-                                        <div className="absolute bottom-1 left-1 w-1 h-1 bg-current opacity-50" />
-                                        <div className="absolute bottom-1 right-1 w-1 h-1 bg-current opacity-50" />
-                                    </motion.div>
-                                ))}
                             </div>
+
+                            {/* Canvas Area - Split for A/B Testing */}
+                            <div className="relative flex-1 bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden min-h-[400px] shadow-inner flex">
+
+                                {/* A/B Split Line */}
+                                {isOptimized && (
+                                    <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-slate-800 z-20 hidden md:block">
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900 border border-slate-700 px-3 py-1 rounded-full text-[10px] font-black text-slate-400 whitespace-nowrap">
+                                            VS
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* LEFT: Legacy (Before) - Only visible when optimized and on large screens, or stacked */}
+                                {isOptimized && (
+                                    <div className="w-1/2 border-r border-slate-800 relative hidden md:block bg-red-950/10 grayscale opacity-70">
+                                        <div className="absolute top-4 left-4 z-30 flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                                            <span className="text-red-400/80 text-xs font-bold uppercase tracking-widest">Legacy Process</span>
+                                        </div>
+                                        {/* Legacy Graph Visualization (Simplified) */}
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="relative w-full h-full p-8">
+                                                <svg className="w-full h-full" viewBox="0 0 300 400">
+                                                    <path d="M 50 50 L 250 100 L 80 250 L 220 350" fill="none" stroke="#ef4444" strokeWidth="2" strokeDasharray="5 5" className="opacity-40" />
+                                                    {DEFAULT_NODES.map((node, i) => (
+                                                        <g key={`legacy-${i}`} transform={`translate(${i === 0 ? 50 : i === 1 ? 250 : i === 2 ? 80 : 220}, ${i === 0 ? 50 : i === 1 ? 100 : i === 2 ? 250 : 350})`}>
+                                                            <rect x="-15" y="-15" width="30" height="30" fill="#1e293b" stroke="#7f1d1d" rx="4" />
+                                                            <text y="30" textAnchor="middle" fill="#991b1b" fontSize="10">{node.label.slice(0, 4)}</text>
+                                                        </g>
+                                                    ))}
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* RIGHT: AI Optimized (After) */}
+                                <div className={`relative ${isOptimized ? "w-full md:w-1/2" : "w-full"}`}>
+                                    <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
+
+                                    {isOptimized && (
+                                        <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_#22d3ee]" />
+                                            <span className="text-cyan-400 text-xs font-bold uppercase tracking-widest">AI Optimized</span>
+                                        </div>
+                                    )}
+
+                                    {isLoading && (
+                                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm">
+                                            <Loader2 className="w-12 h-12 text-cyan-500 animate-spin mb-4" />
+                                            <p className="text-cyan-400 font-mono text-sm animate-pulse">AI PROCESSING...</p>
+                                        </div>
+                                    )}
+
+                                    {/* Optimization Result Logic */}
+                                    {isOptimized && (
+                                        <div className="absolute bottom-4 right-4 bg-cyan-500 text-slate-900 px-4 py-2 rounded-lg font-black text-sm shadow-[0_0_20px_rgba(34,211,238,0.4)] animate-bounce z-40">
+                                            +{(metrics.efficiency - legacyMetrics.efficiency).toFixed(0)}% GAIN
+                                        </div>
+                                    )}
+
+                                    <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 350 550" preserveAspectRatio="xMidYMid meet">
+                                        <AnimatePresence mode="wait">
+                                            {!isOptimized ? (
+                                                <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="standard">
+                                                    <path d="M 40 100 L 310 50 L 100 400 L 300 450" fill="none" stroke="#64748b" strokeWidth="2" strokeDasharray="4 4" className="opacity-40" />
+                                                </motion.g>
+                                            ) : (
+                                                <motion.g initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: 1.5 }} key="optimized">
+                                                    <path d="M 175 50 L 175 150 L 175 250 L 175 450" fill="none" stroke="#22d3ee" strokeWidth="3" className="drop-shadow-[0_0_15px_rgba(34,211,238,0.6)]" />
+                                                    <circle r="3" fill="white" className="animate-[follow-path-vertical_2s_linear_infinite]">
+                                                        <animateMotion path="M 175 50 L 175 150 L 175 250 L 175 450" dur="1s" repeatCount="indefinite" />
+                                                    </circle>
+                                                </motion.g>
+                                            )}
+                                        </AnimatePresence>
+                                    </svg>
+
+                                    {nodes.map((node, i) => {
+                                        // Simplified Vertical Layout for Split View
+                                        const pos = isOptimized
+                                            ? { x: 175, y: 80 + (i * 110) }
+                                            : (i === 0 ? { x: 40, y: 100 } : i === 1 ? { x: 310, y: 50 } : i === 2 ? { x: 100, y: 400 } : { x: 300, y: 450 });
+
+                                        return (
+                                            <motion.div
+                                                key={node.id}
+                                                initial={false}
+                                                animate={{ x: pos.x, y: pos.y }}
+                                                transition={{ type: "spring", stiffness: 80, damping: 15 }}
+                                                className={`absolute -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-xl flex flex-col items-center justify-center gap-1 z-10 border-2 transition-all ${isOptimized
+                                                    ? "bg-slate-900/90 border-cyan-500 shadow-[0_0_30px_rgba(34,211,238,0.3)]"
+                                                    : "bg-slate-900 border-slate-700 opacity-80 grayscale"
+                                                    }`}
+                                                style={{ left: 0, top: 0 }} // Positioning controlled by motion.div animate
+                                            >
+                                                <div className={isOptimized ? "text-cyan-400" : "text-slate-500"}>
+                                                    {/* Resize icon for small nodes */}
+                                                    {node.icon}
+                                                </div>
+                                                <div className={`text-[6px] font-black uppercase tracking-tighter text-center px-1 leading-tight ${isOptimized ? "text-cyan-100" : "text-slate-500"}`}>
+                                                    {node.label}
+                                                </div>
+                                            </motion.div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+
+                            {/* AI Analysis Text */}
+                            {isOptimized && displayedAnalysis && (
+                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-cyan-900/10 border border-cyan-500/30 p-4 rounded-xl">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <TerminalIcon size={14} className="text-cyan-400" />
+                                        <span className="text-xs font-bold text-cyan-400 uppercase">AI Diagnosis</span>
+                                    </div>
+                                    <p className="text-sm text-cyan-100 leading-relaxed font-light font-mono selection:bg-cyan-500/30">
+                                        {displayedAnalysis}
+                                        <span className="inline-block w-2 h-4 bg-cyan-400 ml-1 animate-pulse align-middle" />
+                                    </p>
+                                </motion.div>
+                            )}
                         </div>
 
-                        {/* Right: Analytics Dashboard */}
+                        {/* Right: Metrics */}
                         <div className="w-full lg:w-80 flex flex-col gap-6">
-                            {/* Metrics Panel */}
                             <div className="p-6 bg-slate-950 rounded-2xl border border-slate-800 relative overflow-hidden">
                                 <div className="absolute inset-0 bg-cyan-500/5 animate-pulse" />
-                                <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 relative z-10 flex items-center gap-2">
-                                    <TerminalIcon size={12} /> Real-time Analytics
-                                </h3>
+                                <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 relative z-10">Real-time Analytics</h3>
 
                                 <div className="space-y-6 relative z-10">
                                     <div className="space-y-2">
@@ -220,57 +611,33 @@ export default function ProcessSimulator() {
                                             <span>Throughput</span>
                                             <span className="text-white font-mono text-sm">{Math.floor(metrics.throughput)} UPH</span>
                                         </div>
-                                        <div className="flex gap-0.5 h-4">
-                                            {Array.from({ length: 20 }).map((_, i) => (
-                                                <div
-                                                    key={i}
-                                                    className={`flex-1 rounded-[1px] transition-colors duration-300 ${i < (metrics.throughput / 50)
-                                                        ? (isOptimized ? "bg-cyan-400" : "bg-slate-600")
-                                                        : "bg-slate-800/50"
-                                                        }`}
-                                                />
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800/50">
-                                        <div className="bg-slate-900 p-3 rounded-lg border border-slate-800 text-center">
-                                            <div className="text-[9px] text-slate-500 uppercase font-black">Latency</div>
-                                            <div className={`font-mono text-lg font-bold ${isOptimized ? "text-green-400" : "text-red-400"}`}>
-                                                {isOptimized ? "4ms" : "128ms"}
-                                            </div>
-                                        </div>
-                                        <div className="bg-slate-900 p-3 rounded-lg border border-slate-800 text-center">
-                                            <div className="text-[9px] text-slate-500 uppercase font-black">Errors</div>
-                                            <div className={`font-mono text-lg font-bold ${isOptimized ? "text-green-400" : "text-yellow-500"}`}>
-                                                {isOptimized ? "0.0%" : "2.4%"}
-                                            </div>
+                                        <div className="h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                                            <motion.div
+                                                animate={{ width: `${Math.min(100, metrics.throughput / 10)}%` }} // Scale roughly
+                                                className={`h-full ${isOptimized ? "bg-blue-500" : "bg-slate-600"}`}
+                                            />
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* System Console */}
+                            {/* Log */}
                             <div className="flex-1 bg-black rounded-2xl border border-slate-800 p-4 font-mono text-xs flex flex-col min-h-[250px] shadow-inner relative">
-                                <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(0,50,0,0.2),transparent)]" />
-                                <div className="text-green-500 border-b border-green-900/30 pb-2 mb-2 uppercase tracking-widest font-bold flex justify-between">
-                                    <span>System_Log.txt</span>
-                                    <span>AUTO_SCROLL: ON</span>
-                                </div>
-                                <div className="flex-1 overflow-hidden space-y-2" ref={logContainerRef}>
-                                    {logs.map((log, i) => (
-                                        <div key={i} className="flex gap-3 text-green-400 font-medium">
-                                            <span className="text-green-600/70 text-[10px]">{new Date().toLocaleTimeString().split(' ')[0]}</span>
-                                            <span className="">{log}</span>
+                                <div className="text-green-500 border-b border-green-900/30 pb-2 mb-2 uppercase tracking-widest font-bold">System_Log.txt</div>
+                                <div className="flex-1 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-slate-800" ref={logContainerRef}>
+                                    {logs.map((log) => (
+                                        <div key={log.id} className="flex gap-2">
+                                            <span className="text-slate-600">[{log.time}]</span>
+                                            <span className="text-green-400">{log.message}</span>
                                         </div>
                                     ))}
-                                    <div className="w-2 h-4 bg-green-500 animate-pulse mt-1" />
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
-            </div>
-        </section>
+            </div >
+        </section >
     );
 }
