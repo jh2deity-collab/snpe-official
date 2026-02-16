@@ -719,117 +719,95 @@ export default function ProcessSimulator() {
 
                         {/* Middle: Visualization (Canvas) */}
                         <div className="flex-1 xl:flex-[2] min-w-0 flex flex-col gap-6">
-                            {/* Toolbar */}
-                            <div className="flex justify-between items-center">
-                                <div>
+                            {/* Toolbar (Refactored for Density) */}
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div className="flex-shrink-0">
                                     <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-1">Status</div>
                                     <div className={`text-xl md:text-2xl font-black tracking-tight flex items-center gap-3 ${isOptimized ? "text-cyan-400" : "text-slate-300"}`}>
                                         {isOptimized ? <><Zap className="fill-cyan-400" /> AI OPTIMIZED</> : <><Settings /> STANDBY</>}
                                     </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    {/* Tab Toggle */}
-                                    <div className="bg-slate-950 border border-white/10 p-1 rounded-xl flex items-center mr-2 shadow-inner">
+
+                                <div className="flex flex-wrap justify-end items-center gap-3">
+                                    {/* Group 1: Navigation & View */}
+                                    <div className="flex items-center gap-2 bg-slate-950/50 p-1 rounded-xl border border-white/5">
                                         <button
                                             onClick={() => { setActiveTab("process"); setIsBuildMode(false); }}
-                                            className={`px-4 py-1.5 rounded-lg text-[12px] font-black tracking-widest transition-all flex items-center gap-2 ${activeTab === "process" && !isBuildMode ? "bg-slate-800 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]" : "text-slate-500 hover:text-slate-300"}`}
+                                            className={`px-3 py-1.5 rounded-lg text-[11px] font-black tracking-widest transition-all flex items-center gap-2 ${activeTab === "process" && !isBuildMode ? "bg-slate-800 text-cyan-400" : "text-slate-500 hover:text-slate-300"}`}
                                         >
                                             <Layers size={14} />
                                             PROCESS
                                         </button>
                                         <button
                                             onClick={() => { setActiveTab("iot"); setIsBuildMode(false); }}
-                                            className={`px-4 py-1.5 rounded-lg text-[12px] font-black tracking-widest transition-all flex items-center gap-2 ${activeTab === "iot" ? "bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.2)]" : "text-slate-500 hover:text-slate-300"}`}
+                                            className={`px-3 py-1.5 rounded-lg text-[11px] font-black tracking-widest transition-all flex items-center gap-2 ${activeTab === "iot" ? "bg-blue-600/20 text-blue-400 border border-blue-500/30" : "text-slate-500 hover:text-slate-300"}`}
                                         >
                                             <LayoutDashboard size={14} />
                                             IoT
                                         </button>
+                                        <div className="w-px h-4 bg-slate-800 mx-1" />
+                                        <div className="flex items-center p-0.5 bg-slate-900 rounded-lg">
+                                            <button
+                                                onClick={() => setViewMode("2D")}
+                                                className={`px-2 py-1 rounded-md text-[11px] font-bold transition-all ${viewMode === "2D" ? "bg-slate-700 text-white" : "text-slate-500 hover:text-slate-300"}`}
+                                            >
+                                                2D
+                                            </button>
+                                            <button
+                                                onClick={() => setViewMode("3D")}
+                                                className={`px-2 py-1 rounded-md text-[11px] font-bold transition-all ${viewMode === "3D" ? "bg-blue-600 text-white" : "text-slate-500 hover:text-slate-300"}`}
+                                            >
+                                                3D
+                                            </button>
+                                        </div>
                                     </div>
 
-                                    <div className="w-px h-6 bg-slate-800 mx-2" />
-
-                                    {/* NEW: XAI Toggle */}
-                                    <button
-                                        onClick={() => setIsDeepLogic(!isDeepLogic)}
-                                        className={`flex items-center gap-2 px-4 py-1.5 rounded-lg border transition-all font-black text-[11px] uppercase tracking-widest ${isDeepLogic ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]" : "bg-slate-900 border-slate-700 text-slate-500 hover:text-slate-300"}`}
-                                    >
-                                        <BrainCircuit size={14} className={isDeepLogic ? "animate-pulse" : ""} />
-                                        DEEP LOGIC
-                                    </button>
-
-                                    <div className="w-px h-6 bg-slate-800 mx-2" />
-
-                                    {/* NEW: Stress Test Controls */}
-                                    <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-700 p-1 rounded-lg">
+                                    {/* Group 2: AI & Logic */}
+                                    <div className="flex items-center gap-2">
                                         <button
-                                            onClick={() => triggerStressTest("hardware")}
-                                            className="p-1.5 hover:bg-red-500/20 text-slate-500 hover:text-red-400 rounded-md transition-colors title='Hardware Failure'"
+                                            onClick={() => setIsDeepLogic(!isDeepLogic)}
+                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all font-black text-[11px] uppercase tracking-widest ${isDeepLogic ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]" : "bg-slate-900 border-slate-700 text-slate-500 hover:text-slate-300"}`}
                                         >
-                                            <ZapOff size={14} />
+                                            <BrainCircuit size={14} className={isDeepLogic ? "animate-pulse" : ""} />
+                                            DEEP LOGIC
                                         </button>
                                         <button
-                                            onClick={() => triggerStressTest("power")}
-                                            className="p-1.5 hover:bg-yellow-500/20 text-slate-500 hover:text-yellow-400 rounded-md transition-colors title='Power Surge'"
+                                            onClick={() => { setIsCommandOpen(true); play("click"); }}
+                                            className="px-3 py-1.5 bg-cyan-600/10 border border-cyan-500/30 text-cyan-400 rounded-lg text-[11px] font-black tracking-widest hover:bg-cyan-600/20 transition-all flex items-center gap-2 group"
                                         >
-                                            <Flame size={14} />
-                                        </button>
-                                        <button
-                                            onClick={() => triggerStressTest("bottleneck")}
-                                            className="p-1.5 hover:bg-orange-500/20 text-slate-500 hover:text-orange-400 rounded-md transition-colors title='Bottleneck'"
-                                        >
-                                            <AlertTriangle size={14} />
-                                        </button>
-                                    </div>
-
-                                    {/* NEW: Mute Toggle */}
-                                    <button
-                                        onClick={() => setIsMuted(!isMuted)}
-                                        className="p-1.5 hover:bg-slate-800 text-slate-500 hover:text-slate-300 rounded-md transition-colors"
-                                    >
-                                        {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-                                    </button>
-
-                                    <div className="w-px h-6 bg-slate-800 mx-2" />
-
-                                    {/* View Mode Toggle */}
-                                    <div className={`bg-slate-900 border border-slate-700 p-1 rounded-lg flex items-center mr-2 transition-opacity ${activeTab !== "process" ? "opacity-30 pointer-events-none" : "opacity-100"}`}>
-                                        <button
-                                            onClick={() => setViewMode("2D")}
-                                            className={`px-3 py-1 rounded-md text-[13px] font-bold transition-all ${viewMode === "2D" ? "bg-slate-700 text-white" : "text-slate-300 hover:text-slate-300"}`}
-                                        >
-                                            2D
-                                        </button>
-                                        <button
-                                            onClick={() => setViewMode("3D")}
-                                            className={`px-3 py-1 rounded-md text-[13px] font-bold transition-all ${viewMode === "3D" ? "bg-blue-600 text-white shadow-lg shadow-blue-900/50" : "text-slate-300 hover:text-slate-300"}`}
-                                        >
-                                            3D TWIN
+                                            <Bot size={14} className="group-hover:rotate-12 transition-transform" />
+                                            COMMAND
                                         </button>
                                     </div>
 
-                                    <div className="w-px h-6 bg-slate-800 mx-2" />
+                                    {/* Group 3: Stress & System */}
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1 bg-slate-900 border border-slate-700 p-1 rounded-lg">
+                                            <button onClick={() => triggerStressTest("hardware")} className="p-1 hover:bg-red-500/20 text-slate-500 hover:text-red-400 rounded-md transition-colors"><ZapOff size={13} /></button>
+                                            <button onClick={() => triggerStressTest("power")} className="p-1 hover:bg-yellow-500/20 text-slate-500 hover:text-yellow-400 rounded-md transition-colors"><Flame size={13} /></button>
+                                            <button onClick={() => triggerStressTest("bottleneck")} className="p-1 hover:bg-orange-500/20 text-slate-500 hover:text-orange-400 rounded-md transition-colors"><AlertTriangle size={13} /></button>
+                                        </div>
+                                        <button
+                                            onClick={() => setIsMuted(!isMuted)}
+                                            className="p-1.5 bg-slate-900 border border-slate-700 text-slate-500 hover:text-slate-300 rounded-lg transition-colors"
+                                        >
+                                            {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                                        </button>
+                                    </div>
 
-                                    {/* Ver 4.0: Command HUD Toggle */}
-                                    <button
-                                        onClick={() => { setIsCommandOpen(true); play("click"); }}
-                                        className="px-4 py-1.5 bg-cyan-600/10 border border-cyan-500/30 text-cyan-400 rounded-lg text-[11px] font-black tracking-widest hover:bg-cyan-600/20 transition-all flex items-center gap-2 group"
-                                    >
-                                        <Bot size={14} className="group-hover:rotate-12 transition-transform" />
-                                        COMMAND
-                                    </button>
-
+                                    {/* Group 4: Performance Actions (When Optimized) */}
                                     {isOptimized && (
-                                        <button
-                                            onClick={() => setShowInput(true)}
-                                            className="px-4 py-2 bg-slate-800 text-slate-300 text-[13px] font-bold rounded-lg border border-slate-700 hover:bg-slate-700 transition-colors"
-                                        >
-                                            파라미터 변경
-                                        </button>
-                                    )}
-                                    {isOptimized && (
-                                        <button onClick={resetSimulation} className="px-4 py-2 bg-slate-800 text-slate-300 text-[13px] font-bold rounded-lg border border-slate-700 hover:bg-slate-700 transition-colors">
-                                            초기화
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setShowInput(true)}
+                                                className="px-3 py-1.5 bg-slate-800 text-slate-300 text-[11px] font-black uppercase tracking-widest rounded-lg border border-slate-700 hover:bg-slate-700 transition-colors"
+                                            >
+                                                파라미터 변경
+                                            </button>
+                                            <button onClick={resetSimulation} className="px-3 py-1.5 bg-slate-800 text-slate-300 text-[11px] font-black uppercase tracking-widest rounded-lg border border-slate-700 hover:bg-slate-700 transition-colors">
+                                                초기화
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             </div>
