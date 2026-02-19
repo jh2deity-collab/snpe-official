@@ -16,7 +16,9 @@ import {
     Cpu,
     Database,
     ShieldCheck,
-    Activity
+    Activity,
+    Settings,
+    Layers
 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -48,8 +50,16 @@ export default function ProcessDiagnostics() {
     const [company, setCompany] = useState("");
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
+    const [industry, setIndustry] = useState("");
     const [showValidation, setShowValidation] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
+
+    const INDUSTRIES = [
+        { id: "semi", name: "반도체/디스플레이", icon: <Cpu />, bg: "from-blue-500/10 to-transparent" },
+        { id: "auto", name: "자동차/모빌리티", icon: <Settings />, bg: "from-cyan-500/10 to-transparent" },
+        { id: "bio", name: "바이오/식음료", icon: <Activity />, bg: "from-emerald-500/10 to-transparent" },
+        { id: "gen", name: "일반 제조/기타", icon: <Layers />, bg: "from-indigo-500/10 to-transparent" },
+    ];
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.replace(/[^0-9]/g, '');
@@ -69,7 +79,7 @@ export default function ProcessDiagnostics() {
     };
 
     const runAnalysis = () => {
-        if (!name || !phone) {
+        if (!name || !phone || !industry) {
             setShowValidation(true);
             setShowAlert(true);
             return;
@@ -97,12 +107,10 @@ export default function ProcessDiagnostics() {
         setIsGenerating(true);
 
         try {
-            // 1. 나눔고딕 폰트 로드
             const fontResponse = await fetch('/fonts/NanumGothic.ttf');
             if (!fontResponse.ok) throw new Error("Font load failed");
             const fontBuffer = await fontResponse.arrayBuffer();
 
-            // 2. Base64 변환
             let binary = '';
             const bytes = new Uint8Array(fontBuffer);
             const len = bytes.byteLength;
@@ -111,72 +119,126 @@ export default function ProcessDiagnostics() {
             }
             const base64Font = btoa(binary);
 
-            // 3. jsPDF 설정 및 폰트 등록
             const doc = new jsPDF();
             doc.addFileToVFS('NanumGothic.ttf', base64Font);
             doc.addFont('NanumGothic.ttf', 'NanumGothic', 'normal');
             doc.setFont('NanumGothic');
 
             const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
             const maturity = getMaturityLevel(score);
 
-            // Header
+            // PAGE 1: TITLE PAGE
             doc.setFillColor(15, 23, 42);
-            doc.rect(0, 0, pageWidth, 40, 'F');
+            doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
             doc.setTextColor(255, 255, 255);
-            doc.setFontSize(22);
-            doc.text("SNPE AI PROCESS DIAGNOSTICS", 20, 25);
+            doc.setFontSize(40);
+            doc.text("SNPE", pageWidth / 2, 100, { align: 'center' });
+            doc.setFontSize(24);
+            doc.text("CUSTOM AI WHITEPAPER", pageWidth / 2, 120, { align: 'center' });
+
+            doc.setDrawColor(59, 130, 246);
+            doc.setLineWidth(1);
+            doc.line(pageWidth / 2 - 40, 130, pageWidth / 2 + 40, 130);
+
+            doc.setFontSize(14);
+            doc.text(`Target Industry: ${industry}`, pageWidth / 2, 160, { align: 'center' });
+            doc.text(`Client: ${company || name}`, pageWidth / 2, 170, { align: 'center' });
 
             doc.setFontSize(10);
             doc.setTextColor(148, 163, 184);
-            doc.text(`Reference ID: DX-${Math.floor(Math.random() * 100000)}`, 20, 32);
-            doc.text(`Company: ${company || "미지정"} | Client: ${name}`, 20, 37);
+            doc.text(`Ref ID: WH-SNPE-${Math.floor(Date.now() / 1000)}`, pageWidth / 2, 260, { align: 'center' });
+            doc.text(`Generated on: ${new Date().toLocaleDateString()}`, pageWidth / 2, 265, { align: 'center' });
 
-            // Body
+            // PAGE 2: EXECUTIVE SUMMARY
+            doc.addPage();
+            doc.setFillColor(255, 255, 255);
+            doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
             doc.setTextColor(15, 23, 42);
-            doc.setFontSize(16);
-            doc.text("1. 진단 결과 요약", 20, 60);
+            doc.setFontSize(20);
+            doc.text("1. EXECUTIVE SUMMARY", 20, 40);
+
+            doc.setFontSize(12);
+            doc.setTextColor(71, 85, 105);
+            const summaryText = `본 백서는 ${industry} 부문의 공정 고도화를 위해 작성되었습니다. 귀사의 현재 지능화 성숙도 점수는 ${score}점(Level ${maturity.level})으로 측정되었으며, 이는 '${maturity.name}' 단계에 해당합니다.`;
+            doc.text(doc.splitTextToSize(summaryText, pageWidth - 40), 20, 55);
 
             autoTable(doc, {
-                startY: 70,
-                head: [['진단 항목', '점수', '상태']],
+                startY: 75,
+                head: [['영역', '평가 기준', '상태']],
                 body: [
-                    ['종합 지능화 점수', `${score} / 100`, 'Evaluated'],
-                    ['성숙도 레벨', `Level ${maturity.level}`, maturity.name],
-                    ['현재 핵심 상태', '-', maturity.desc],
+                    ['Data Integration', '실시간 수집 및 로그 체계', score > 30 ? '우수' : '보완 필요'],
+                    ['Automation', 'M2M 및 무인화 수준', score > 50 ? '우수' : '보완 필요'],
+                    ['AI Intelligence', '예지 보전 및 자율 최적화', score > 80 ? '최상위' : '도입 준비'],
                 ],
                 theme: 'grid',
                 headStyles: { fillColor: [15, 23, 42], font: 'NanumGothic' },
-                styles: { font: 'NanumGothic', fontStyle: 'normal' }
+                styles: { font: 'NanumGothic' }
             });
 
-            // Recommendations
-            doc.setFontSize(16);
-            // @ts-ignore
-            const finalY = doc.lastAutoTable.finalY + 15;
-            doc.text("2. 전략적 최적화 로드맵", 20, finalY);
+            // PAGE 3: RECOMMENDED TECH STACK
+            doc.addPage();
+            doc.setFontSize(20);
+            doc.setTextColor(15, 23, 42);
+            doc.text("2. RECOMMENDED TECH STACK", 20, 40);
 
-            doc.setFontSize(11);
-            const roadmaps = {
-                1: "공정 데이터의 디지털화가 시급합니다. 수동 조작을 줄이기 위한 센서 부착과 기본 데이터 로깅 시스템 구축을 제안합니다.",
-                2: "분절된 데이터를 중앙으로 통합하고, 실시간 모니터링을 통해 가시성을 확보하는 단계입니다.",
-                3: "통합된 데이터를 바탕으로 AI 예지 보전 모델을 도입하여 가동률과 생산 효율을 극대화할 수 있습니다.",
-                4: "전체 공정에 대한 AI 기반 자율 최적화 시스템을 구축하여 에너지 절감 및 품질 균일도를 혁신적으로 높입니다.",
-                5: "이미 세계 선도 수준의 지능화 공정을 보유하고 있습니다. 차세대 코그니티브 팩토리 확산을 위한 고도화를 제안합니다."
+            const getStack = () => {
+                if (industry === "반도체/디스플레이") return [
+                    ["Control Layer", "High-Speed PLC (0.1ms)", "초정밀 극소 시간 제어"],
+                    ["Data Layer", "Edge-Computing MES", "현장 밀착형 실시간 로그 통합"],
+                    ["AI Layer", "DL-Defect Vision AI", "나노급 불량 검출 및 분류"]
+                ];
+                return [
+                    ["Control Layer", "IPC & Real-time OS", "범용 데이터 처리 및 제어 안정성"],
+                    ["Data Layer", "Cloud-Based SCADA", "광역 자원 통합 모니터링"],
+                    ["AI Layer", "Predictive Maintenance", "고장 전조 증상 정밀 분석"]
+                ];
             };
-            // @ts-ignore
-            const splitRoadmap = doc.splitTextToSize(roadmaps[maturity.level as keyof typeof roadmaps], pageWidth - 40);
-            doc.text(splitRoadmap, 20, finalY + 12);
 
-            // Footer
-            doc.setFontSize(9);
-            doc.setTextColor(148, 163, 184);
-            doc.text("본 결과는 SNPE AI 엔진에 의해 생성된 가이드 리포트입니다.", pageWidth / 2, 280, { align: 'center' });
+            autoTable(doc, {
+                startY: 55,
+                head: [['Layer', 'Solution Name', 'Core Value']],
+                body: getStack(),
+                theme: 'striped',
+                headStyles: { fillColor: [59, 130, 246], font: 'NanumGothic' },
+                styles: { font: 'NanumGothic' }
+            });
 
-            doc.save(`SNPE_진단리포트_${name}.pdf`);
+            // PAGE 4: IMPACT & ROADMAP
+            doc.addPage();
+            doc.setFontSize(20);
+            doc.text("3. IMPACT & ROADMAP", 20, 40);
+
+            doc.setFontSize(14);
+            doc.text("■ 기대 효과 (ROI / ESG)", 20, 55);
+            doc.setFontSize(11);
+            doc.setTextColor(51, 65, 85);
+            doc.text(`- 운영 효율(OEE) 향상: 약 ${score < 50 ? "15-20%" : "5-10% 추가"} 기대`, 25, 65);
+            doc.text(`- 탄소 세수 절감: 연간 약 3.2톤 배출량 저감 효과 예측`, 25, 72);
+
+            doc.setFontSize(14);
+            doc.setTextColor(15, 23, 42);
+            doc.text("■ 전략적 로드맵 (Phase 1-3)", 20, 95);
+            doc.setFontSize(11);
+            doc.text("1. Phase 1 (Short-term): 센서 보강 및 데이터 인프라 실시간 통합", 25, 105);
+            doc.text("2. Phase 2 (Mid-term): AI 기반 예지 보전 모델 및 불량 관리 자동화", 25, 112);
+            doc.text("3. Phase 3 (Long-term): 자율 최적화 공정 및 글로벌 관제 허브 구축", 25, 119);
+
+            // Footer for all pages
+            const totalPages = doc.internal.pages.length - 1;
+            for (let i = 1; i <= totalPages; i++) {
+                doc.setPage(i);
+                doc.setFontSize(9);
+                doc.setTextColor(148, 163, 184);
+                doc.text(`SNPE Custom Technical Whitepaper | Page ${i} of ${totalPages}`, pageWidth / 2, 285, { align: 'center' });
+            }
+
+            doc.save(`SNPE_Technical_Whitepaper_${name}.pdf`);
         } catch (error) {
             console.error("PDF 생성 에러:", error);
-            alert("리포트 생성 중 오류가 발생했습니다. 한글 폰트 로드 상태를 확인해 주세요.");
+            alert("백서 생성 중 오류가 발생했습니다.");
         } finally {
             setIsGenerating(false);
         }
@@ -269,6 +331,26 @@ export default function ProcessDiagnostics() {
                                     className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none"
                                 />
                             </div>
+
+                            <div className="space-y-4">
+                                <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">산업 분야 선택 (필수)</p>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    {INDUSTRIES.map((item) => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => setIndustry(item.name)}
+                                            className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-all ${industry === item.name
+                                                    ? "bg-blue-600/20 border-blue-500 text-blue-400"
+                                                    : "bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-700"
+                                                }`}
+                                        >
+                                            <div className="scale-75">{item.icon}</div>
+                                            <span className="text-[10px] font-bold">{item.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
                             <button
                                 onClick={runAnalysis}
                                 className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold flex items-center justify-center gap-3 transition-all"
@@ -335,10 +417,10 @@ export default function ProcessDiagnostics() {
                             <button
                                 onClick={handleDownloadReport}
                                 disabled={isGenerating}
-                                className="w-full py-5 bg-white text-slate-950 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-slate-100 transition-all disabled:opacity-50"
+                                className="w-full py-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black flex items-center justify-center gap-3 hover:from-blue-500 hover:to-indigo-500 transition-all disabled:opacity-50 shadow-xl shadow-blue-500/20"
                             >
                                 {isGenerating ? <Loader2 className="animate-spin" /> : <FileText size={20} />}
-                                상세 진단 리포트 (PDF) 다운로드
+                                지능형 맞춤 기술 제안 백서 (PDF) 발행
                             </button>
                         </div>
 
