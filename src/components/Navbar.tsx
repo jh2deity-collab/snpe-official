@@ -31,8 +31,8 @@ export default function Navbar() {
                             <span className="text-[22px] md:text-[28px] font-black tracking-tighter text-slate-800 bg-clip-text text-transparent bg-gradient-to-r from-slate-950 via-slate-700 to-slate-950 whitespace-nowrap">
                                 (주)에스앤피이
                             </span>
-                            <span className="text-[12px] md:text-[14px] font-bold tracking-[0.35em] text-slate-400 uppercase mt-2.5 whitespace-nowrap">
-                                SNPE ENGINEERING
+                            <span className="text-[11px] md:text-[12px] font-bold tracking-[0.15em] text-slate-400 uppercase mt-2.5 whitespace-nowrap">
+                                SYSTEM & PROCESS ENGINEERING
                             </span>
                         </div>
                     </div>
