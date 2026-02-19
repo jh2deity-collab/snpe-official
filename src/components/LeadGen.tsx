@@ -181,11 +181,11 @@ export default function LeadGen() {
                                     <div className="w-24 h-24 bg-primary rounded-[2rem] flex items-center justify-center text-white mx-auto shadow-2xl shadow-primary/30">
                                         <ShieldCheck size={48} />
                                     </div>
-                                    <div className="space-y-4">
-                                        <h3 className="text-4xl font-black text-white tracking-tight">상담 접수 완료</h3>
-                                        <p className="text-slate-400 font-bold leading-relaxed">
+                                    <div className="space-y-6">
+                                        <h3 className="text-3xl font-black text-white tracking-tight">상담 접수 완료</h3>
+                                        <p className="text-slate-300 font-bold text-base md:text-lg leading-loose">
                                             정확하게 전달되었습니다. <br />
-                                            담당 엔지니어가 곧 연락드리겠습니다.
+                                            담당 엔지니어가 <span className="text-blue-400">최대한 빠르게</span> 연락드리겠습니다.
                                         </p>
                                     </div>
                                     <button

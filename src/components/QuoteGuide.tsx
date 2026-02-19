@@ -327,11 +327,11 @@ export default function QuoteGuide() {
                                     <div className="w-32 h-32 bg-primary rounded-[2rem] flex items-center justify-center text-white mx-auto shadow-2xl shadow-primary/30">
                                         <FileText size={48} />
                                     </div>
-                                    <div className="space-y-4">
-                                        <h3 className="text-2xl font-black text-white tracking-tight">신청 완료</h3>
-                                        <p className="text-slate-200 font-bold text-sm leading-relaxed max-w-lg mx-auto">
+                                    <div className="space-y-6">
+                                        <h3 className="text-3xl font-black text-white tracking-tight">신청 완료</h3>
+                                        <p className="text-slate-200 font-bold text-base md:text-lg leading-loose max-w-lg mx-auto">
                                             분석된 정보를 바탕으로 SNPE 기술팀이 <br />
-                                            <span className="text-primary">맞춤형 기술 가이드 팩</span>을 준비 중입니다.
+                                            <span className="text-blue-400">맞춤형 기술 가이드 팩</span>을 준비 중입니다.
                                         </p>
                                     </div>
                                     <div className="pt-10">
