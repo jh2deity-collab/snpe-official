@@ -518,7 +518,7 @@ export default function ProcessSimulator() {
                         <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_10px_#3b82f6]" />
                         <span className="text-blue-400 font-bold tracking-[0.2em] text-[11px] uppercase">Interactive Digital Twin</span>
                     </motion.div>
-                    <h2 className="text-4xl md:text-[3vw] font-black text-white tracking-tighter leading-none">
+                    <h2 className="text-3xl md:text-[2.4vw] font-black text-white tracking-tighter leading-none">
                         PROCESS <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">OPTIMIZER</span>
                     </h2>
                     <p className="text-slate-400 font-medium text-lg">

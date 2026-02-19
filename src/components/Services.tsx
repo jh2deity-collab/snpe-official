@@ -68,7 +68,7 @@ export default function Services() {
                                     <div className="w-12 h-[2px] bg-blue-500 shadow-[0_0_15px_#3b82f6]" />
                                     <span className="text-blue-400 text-[13px] font-black uppercase tracking-[0.4em] drop-shadow-[0_0_5px_rgba(59,130,246,0.5)]">Core Expertise</span>
                                 </div>
-                                <h2 className="text-4xl md:text-[3vw] font-black text-white tracking-tighter leading-[0.9]">
+                                <h2 className="text-3xl md:text-[2.4vw] font-black text-white tracking-tighter leading-[0.9]">
                                     QUANTUM <br />
                                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500 filter drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]">LEAP</span> <br />
                                     SOLUTIONS

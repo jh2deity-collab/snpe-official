@@ -120,7 +120,7 @@ export default function QuoteGuide() {
                             <Zap size={14} className="text-primary animate-pulse" />
                             <span className="text-primary text-[10px] font-black uppercase tracking-[0.4em]">Smart Factory Consulting</span>
                         </motion.div>
-                        <h2 className="text-4xl md:text-[3vw] font-black text-white tracking-tighter leading-none">
+                        <h2 className="text-3xl md:text-[2.4vw] font-black text-white tracking-tighter leading-none">
                             GET YOUR <br />
                             <span className="text-slate-800">GUIDELINE</span>
                         </h2>

@@ -18,13 +18,23 @@ export default function Navbar() {
                     className="flex items-center gap-3 group cursor-pointer"
                     onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 >
-                    {/* Logo Image */}
-                    <div className="relative h-12 md:h-20 w-auto">
-                        <img
-                            src="/images/logo.png"
-                            alt="SNPE Logo"
-                            className="h-full w-auto object-contain"
-                        />
+                    <div className="flex items-center gap-5">
+                        <div className="relative h-16 md:h-22 w-auto shrink-0">
+                            <img
+                                src="/images/logo.png"
+                                alt="SNPE Logo"
+                                className="h-full w-auto object-contain"
+                            />
+                        </div>
+                        <div className="h-10 w-px bg-slate-100 hidden md:block" />
+                        <div className="flex flex-col justify-center leading-none">
+                            <span className="text-[22px] md:text-[28px] font-black tracking-tighter text-slate-800 bg-clip-text text-transparent bg-gradient-to-r from-slate-950 via-slate-700 to-slate-950 whitespace-nowrap">
+                                (주)에스앤피이
+                            </span>
+                            <span className="text-[12px] md:text-[14px] font-bold tracking-[0.35em] text-slate-400 uppercase mt-2.5 whitespace-nowrap">
+                                SNPE ENGINEERING
+                            </span>
+                        </div>
                     </div>
                 </motion.div>
 

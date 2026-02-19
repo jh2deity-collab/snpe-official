@@ -106,7 +106,7 @@ export default function Hero() {
                             y: mousePosition.y * 20
                         }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="text-[42px] md:text-[3vw] font-black leading-[0.9] text-white tracking-tight mb-6 md:mb-8"
+                        className="text-[34px] md:text-[2.4vw] font-black leading-[0.9] text-white tracking-tight mb-6 md:mb-8"
                     >
                         DEFINE <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500">

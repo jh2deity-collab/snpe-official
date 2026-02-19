@@ -83,7 +83,7 @@ export default function ProjectTimeline() {
                         <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_10px_#3b82f6]" />
                         <span className="text-blue-400 text-xs font-black tracking-[0.4em] uppercase">Success Record</span>
                     </motion.div>
-                    <h2 className="text-4xl md:text-[3vw] font-black text-white tracking-tighter leading-none">
+                    <h2 className="text-3xl md:text-[2.4vw] font-black text-white tracking-tighter leading-none">
                         PERFORMANCE <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 filter drop-shadow-[0_0_20px_rgba(59,130,246,0.5)]">MILESTONES</span>
                     </h2>

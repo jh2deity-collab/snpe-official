@@ -32,7 +32,7 @@ export default function CoreValues() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: 0.1 }}
-                                className="text-4xl md:text-[3vw] font-black text-white tracking-tighter leading-none"
+                                className="text-3xl md:text-[2.4vw] font-black text-white tracking-tighter leading-none"
                             >
                                 WHY <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 filter drop-shadow-[0_0_20px_rgba(34,211,238,0.4)]">SNPE?</span>

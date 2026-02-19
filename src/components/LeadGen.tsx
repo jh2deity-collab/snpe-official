@@ -62,7 +62,7 @@ export default function LeadGen() {
                                 <div className="w-12 h-[2px] bg-primary shadow-[0_0_15px_#3b82f6]" />
                                 <span className="text-primary text-[13px] font-black uppercase tracking-[0.4em]">Get in Touch</span>
                             </div>
-                            <h2 className="text-4xl md:text-[3vw] font-black text-white tracking-tighter leading-none">
+                            <h2 className="text-3xl md:text-[2.4vw] font-black text-white tracking-tighter leading-none">
                                 START YOUR <br />
                                 <span className="text-slate-800">JOURNEY</span>
                             </h2>
