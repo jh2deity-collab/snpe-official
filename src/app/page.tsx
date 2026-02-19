@@ -10,6 +10,7 @@ import QuoteGuide from "@/components/QuoteGuide";
 import CoreValues from "@/components/CoreValues";
 
 import ProcessDiagnostics from "@/components/ProcessDiagnostics";
+import TechStackCurator from "@/components/TechStackCurator";
 
 export default function Home() {
   return (
@@ -20,6 +21,7 @@ export default function Home() {
       <ProjectTimeline />
       <CoreValues />
       <ProcessSimulator />
+      <TechStackCurator />
 
       {/* Diagnostic Tool Section */}
       <section id="insights" className="section-padding bg-slate-950 relative border-t border-slate-900">
